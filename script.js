@@ -27,6 +27,7 @@ let sourceCanvas = null;
 let sourceImageData = null;
 let sourceFile = null;
 let activeResultCanvas = null;
+let cropSelection = null;
 let toastTimer;
 
 const labDefinitions = {
@@ -288,7 +289,11 @@ document.addEventListener('keydown', (event) => {
   }
 });
 
-technique.addEventListener('change', renderDynamicControls);
+technique.addEventListener('change', () => {
+  if (technique.value === 'crop' && !cropSelection && sourceCanvas) cropSelection = null;
+  renderDynamicControls();
+  if (sourceCanvas) renderSourcePreview();
+});
 function renderDynamicControls() {
   const value = technique.value;
   if (currentLab === '01') {
@@ -299,7 +304,7 @@ function renderDynamicControls() {
       const maxY = Math.max(0, (sourceCanvas?.height || 1) - 1);
       operationControls = `<div class="control-block compact-controls"><label>Pixel coordinate & color</label><div class="field-row"><label>X<input id="pixel-x" type="number" min="0" max="${maxX}" value="${Math.floor(maxX / 2)}"></label><label>Y<input id="pixel-y" type="number" min="0" max="${maxY}" value="${Math.floor(maxY / 2)}"></label><label>Color<input id="pixel-color" type="color" value="#ff4f8b"></label></div></div>`;
     } else if (value === 'crop') {
-      operationControls = rangeControl('crop-width', 'Crop width', 20, 100, 70, 5, '%') + rangeControl('crop-height', 'Crop height', 20, 100, 70, 5, '%') + `<div class="control-block"><label for="crop-position">Crop position</label><select id="crop-position"><option value="center">Center</option><option value="top-left">Top left</option><option value="top-right">Top right</option><option value="bottom-left">Bottom left</option><option value="bottom-right">Bottom right</option></select></div>`;
+      operationControls = `<div class="control-block crop-instructions"><label>Interactive crop selection</label><p>Drag directly over the original image to mark the area you want to keep.</p><div id="crop-selection-readout"><span>No area selected</span><strong>Click and drag on the image</strong></div><button id="clear-crop-selection" type="button" disabled>Clear selection</button></div>`;
     } else if (value === 'resize') {
       operationControls = rangeControl('operation-value', 'Output scale', 25, 100, 50, 5, '%');
     } else {
@@ -308,6 +313,8 @@ function renderDynamicControls() {
     dynamicControls.innerHTML = transformTools + operationControls;
     bindRangeOutputs();
     bindTransformTools();
+    bindCropControls();
+    updateCropRunState();
   } else if (currentLab === '02') {
     dynamicControls.innerHTML = rangeControl('low-threshold', 'Canny low threshold', 0, 200, 50, 5, '') + rangeControl('high-threshold', 'Canny high threshold', 50, 255, 150, 5, '');
     bindRangeOutputs();
@@ -327,8 +334,21 @@ function bindTransformTools() {
     button.addEventListener('click', () => {
       technique.value = button.dataset.transform;
       renderDynamicControls();
+      if (sourceCanvas) renderSourcePreview();
     });
   });
+}
+
+function bindCropControls() {
+  const clearButton = document.querySelector('#clear-crop-selection');
+  if (!clearButton) return;
+  clearButton.addEventListener('click', () => {
+    cropSelection = null;
+    renderSourcePreview();
+    updateCropReadout();
+    updateCropRunState();
+  });
+  updateCropReadout();
 }
 
 function rangeControl(id, label, min, max, value, step, suffix) {
@@ -381,6 +401,7 @@ function loadImage(file) {
       context.drawImage(image, 0, 0, width, height);
       sourceImageData = context.getImageData(0, 0, width, height);
       sourceFile = file;
+      cropSelection = null;
 
       document.querySelector('#metric-width').textContent = image.naturalWidth;
       document.querySelector('#metric-height').textContent = image.naturalHeight;
@@ -401,9 +422,11 @@ function renderSourcePreview() {
   clearResults();
   const result = createResultCard('Source image', 'Uploaded input', sourceCanvas.width, sourceCanvas.height);
   result.context.drawImage(sourceCanvas, 0, 0);
+  if (currentLab === '01' && technique.value === 'crop') attachCropSelector(result);
   activeResultCanvas = result.canvas;
   revealResults();
   downloadButton.disabled = false;
+  updateCropRunState();
 }
 
 runButton.addEventListener('click', async () => {
@@ -440,6 +463,7 @@ function runLabOne() {
   clearResults();
   const original = createResultCard('Original', `${sourceCanvas.width} × ${sourceCanvas.height} · RGBA`, sourceCanvas.width, sourceCanvas.height);
   original.context.drawImage(sourceCanvas, 0, 0);
+  if (operation === 'crop') attachCropSelector(original);
   activeResultCanvas = original.canvas;
 
   if (operation === 'grayscale') {
@@ -466,19 +490,11 @@ function runLabOne() {
     }
     activeResultCanvas = renderImageDataResult('Modified pixel region', `Coordinate (${x}, ${y}) · RGB(${red}, ${green}, ${blue})`, output, sourceCanvas.width, sourceCanvas.height).canvas;
   } else if (operation === 'crop') {
-    const widthAmount = Number(document.querySelector('#crop-width').value) / 100;
-    const heightAmount = Number(document.querySelector('#crop-height').value) / 100;
-    const position = document.querySelector('#crop-position').value;
-    const width = Math.max(1, Math.round(sourceCanvas.width * widthAmount));
-    const height = Math.max(1, Math.round(sourceCanvas.height * heightAmount));
-    let sx = Math.round((sourceCanvas.width - width) / 2);
-    let sy = Math.round((sourceCanvas.height - height) / 2);
-    if (position.includes('left')) sx = 0;
-    if (position.includes('right')) sx = sourceCanvas.width - width;
-    if (position.includes('top')) sy = 0;
-    if (position.includes('bottom')) sy = sourceCanvas.height - height;
-    const positionLabel = position.split('-').map(capitalize).join(' ');
-    const result = createResultCard(`${positionLabel} crop`, `${Math.round(widthAmount * 100)}% × ${Math.round(heightAmount * 100)}% ROI · ${width} × ${height}`, width, height);
+    if (!cropSelection) throw new Error('Select a crop area on the original image first.');
+    const { x: sx, y: sy, width, height } = cropSelection;
+    const widthAmount = width / sourceCanvas.width;
+    const heightAmount = height / sourceCanvas.height;
+    const result = createResultCard('Selected crop', `${Math.round(widthAmount * 100)}% × ${Math.round(heightAmount * 100)}% ROI · ${width} × ${height}`, width, height);
     result.context.drawImage(sourceCanvas, sx, sy, width, height, 0, 0, width, height);
     activeResultCanvas = result.canvas;
   } else if (operation === 'resize') {
@@ -551,6 +567,110 @@ function clearResults() {
   resultGrid.hidden = false;
   emptyOutput.hidden = true;
   activeResultCanvas = null;
+}
+
+function attachCropSelector(result) {
+  const { canvas, card } = result;
+  const wrap = canvas.parentElement;
+  card.classList.add('crop-source-card');
+  wrap.classList.add('crop-selector-active');
+  canvas.style.cursor = 'crosshair';
+  canvas.style.touchAction = 'none';
+
+  const overlay = document.createElement('div');
+  overlay.className = 'crop-selection-box';
+  overlay.innerHTML = '<i></i><i></i><i></i><i></i><span></span>';
+  wrap.appendChild(overlay);
+
+  const prompt = document.createElement('div');
+  prompt.className = 'crop-canvas-prompt';
+  prompt.textContent = 'Drag to select crop area';
+  wrap.appendChild(prompt);
+
+  let dragging = false;
+  let start = null;
+
+  const canvasPoint = (event) => {
+    const bounds = canvas.getBoundingClientRect();
+    return {
+      x: clamp(Math.round((event.clientX - bounds.left) / bounds.width * canvas.width), 0, canvas.width),
+      y: clamp(Math.round((event.clientY - bounds.top) / bounds.height * canvas.height), 0, canvas.height)
+    };
+  };
+
+  const drawOverlay = () => {
+    if (!cropSelection) {
+      overlay.classList.remove('visible');
+      prompt.hidden = false;
+      return;
+    }
+    const canvasBounds = canvas.getBoundingClientRect();
+    const wrapBounds = wrap.getBoundingClientRect();
+    overlay.style.left = `${canvasBounds.left - wrapBounds.left + cropSelection.x / canvas.width * canvasBounds.width}px`;
+    overlay.style.top = `${canvasBounds.top - wrapBounds.top + cropSelection.y / canvas.height * canvasBounds.height}px`;
+    overlay.style.width = `${cropSelection.width / canvas.width * canvasBounds.width}px`;
+    overlay.style.height = `${cropSelection.height / canvas.height * canvasBounds.height}px`;
+    overlay.querySelector('span').textContent = `${cropSelection.width} × ${cropSelection.height}`;
+    overlay.classList.add('visible');
+    prompt.hidden = true;
+  };
+
+  canvas.addEventListener('pointerdown', (event) => {
+    event.preventDefault();
+    dragging = true;
+    start = canvasPoint(event);
+    cropSelection = { x: start.x, y: start.y, width: 1, height: 1 };
+    canvas.setPointerCapture?.(event.pointerId);
+    drawOverlay();
+  });
+
+  canvas.addEventListener('pointermove', (event) => {
+    if (!dragging) return;
+    const point = canvasPoint(event);
+    cropSelection = {
+      x: Math.min(start.x, point.x),
+      y: Math.min(start.y, point.y),
+      width: Math.max(1, Math.abs(point.x - start.x)),
+      height: Math.max(1, Math.abs(point.y - start.y))
+    };
+    drawOverlay();
+    updateCropReadout();
+    updateCropRunState();
+  });
+
+  const finishSelection = (event) => {
+    if (!dragging) return;
+    dragging = false;
+    canvas.releasePointerCapture?.(event.pointerId);
+    if (cropSelection.width < 4 || cropSelection.height < 4) cropSelection = null;
+    drawOverlay();
+    updateCropReadout();
+    updateCropRunState();
+  };
+  canvas.addEventListener('pointerup', finishSelection);
+  canvas.addEventListener('pointercancel', finishSelection);
+  window.addEventListener('resize', drawOverlay, { passive: true });
+  requestAnimationFrame(drawOverlay);
+}
+
+function updateCropReadout() {
+  const readout = document.querySelector('#crop-selection-readout');
+  const clearButton = document.querySelector('#clear-crop-selection');
+  if (!readout) return;
+  if (!cropSelection || !sourceCanvas) {
+    readout.innerHTML = '<span>No area selected</span><strong>Click and drag on the image</strong>';
+    if (clearButton) clearButton.disabled = true;
+    return;
+  }
+  const widthPercent = Math.round(cropSelection.width / sourceCanvas.width * 100);
+  const heightPercent = Math.round(cropSelection.height / sourceCanvas.height * 100);
+  readout.innerHTML = `<span>X ${cropSelection.x} · Y ${cropSelection.y}</span><strong>${cropSelection.width} × ${cropSelection.height}px · ${widthPercent}% × ${heightPercent}%</strong>`;
+  if (clearButton) clearButton.disabled = false;
+}
+
+function updateCropRunState() {
+  if (currentLab === '01' && technique.value === 'crop') runButton.disabled = !sourceCanvas || !cropSelection;
+  else runButton.disabled = !sourceCanvas;
 }
 
 function revealResults() {
@@ -826,6 +946,7 @@ function resetOutput() {
   sourceImageData = null;
   sourceFile = null;
   activeResultCanvas = null;
+  cropSelection = null;
   fileInput.value = '';
   resultGrid.innerHTML = '';
   resultGrid.hidden = true;

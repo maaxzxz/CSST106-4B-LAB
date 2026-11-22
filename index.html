@@ -6,6 +6,17 @@
     <meta name="description" content="CSST 106 computer vision laboratory workspace." />
     <meta name="theme-color" content="#080e1b" />
     <title>CVision Lab — CSST 106</title>
+    <script>
+      (() => {
+        try {
+          const savedTheme = localStorage.getItem('cvision-theme');
+          const systemTheme = matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark';
+          document.documentElement.dataset.theme = savedTheme || systemTheme;
+        } catch {
+          document.documentElement.dataset.theme = 'dark';
+        }
+      })();
+    </script>
     <link rel="stylesheet" href="styles.css" />
     <script src="script.js" defer></script>
   </head>
@@ -58,6 +69,10 @@
               <input type="search" id="lab-search" placeholder="Search activities" aria-label="Search activities" />
               <kbd>⌘ K</kbd>
             </label>
+            <button class="icon-button theme-toggle" id="theme-toggle" type="button" aria-label="Switch to light mode" aria-pressed="false">
+              <svg class="sun-icon" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.42 1.42M17.65 17.65l1.42 1.42M2 12h2M20 12h2M4.93 19.07l1.42-1.42M17.65 6.35l1.42-1.42" /></svg>
+              <svg class="moon-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M20 15.3A8.5 8.5 0 0 1 8.7 4 8.5 8.5 0 1 0 20 15.3Z" /></svg>
+            </button>
             <button class="icon-button" type="button" aria-label="Notifications">
               <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4" /></svg><i></i>
             </button>
@@ -74,14 +89,22 @@
                 <h1>See data.<br /><em>Understand vision.</em></h1>
                 <p class="banner-description">Run, document, and review every CSST 106 laboratory activity from one focused workspace.</p>
                 <div class="banner-actions">
-                  <button class="primary-button" id="continue-button" type="button">Continue Lab 01</button>
-                  <a href="#activities">View all activities</a>
+                  <button class="primary-button" id="continue-button" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 7 8 5-8 5V7Z" /></svg>Continue Lab 01</button>
+                  <a href="#activities"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z" /></svg>View all activities</a>
                 </div>
               </div>
-              <div class="hero-art">
-                <div class="scan-box" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
-                <div class="scan-label"><span></span> TRACKING ACTIVE</div>
-                <img src="assets/vision-student.png" alt="Student using a futuristic computer vision visor" />
+              <div class="vision-simulator" aria-label="Animated live computer vision analysis display">
+                <div class="sim-header"><span><i></i> LIVE ANALYSIS</span><b>CAM_01</b></div>
+                <div class="sim-viewport" aria-hidden="true">
+                  <div class="sim-scan-line"></div>
+                  <div class="sim-crosshair"><i></i><i></i></div>
+                  <div class="sim-aperture"><i></i><i></i><i></i><i></i><i></i><i></i><span></span></div>
+                  <div class="detect-frame frame-a"><span>FEATURE_A · 98%</span></div>
+                  <div class="detect-frame frame-b"><span>EDGE_04</span></div>
+                  <div class="sim-node node-a"></div><div class="sim-node node-b"></div><div class="sim-node node-c"></div>
+                  <div class="signal-bars"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+                </div>
+                <div class="sim-footer"><span>OBJECTS <b>03</b></span><span>CONFIDENCE <b>98.2%</b></span><span>FPS <b>60</b></span></div>
               </div>
               <div class="banner-stats">
                 <div><strong>02</strong><span>Interfaces ready</span></div>
@@ -101,37 +124,37 @@
 
             <div class="lab-grid" id="lab-grid">
               <article class="lab-card featured" data-status="ready" data-search="image fundamentals pixels color channels histogram">
-                <div class="card-head"><span>LAB ACTIVITY 01</span><b class="status ready">Ready</b></div>
+                <div class="card-head"><span><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>LAB ACTIVITY 01</span><b class="status ready">Ready</b></div>
                 <div class="card-visual histogram" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
                 <div class="card-body"><p>Image processing</p><h3>Image Fundamentals</h3><p>Inspect image properties, RGB channels, grayscale conversion, and intensity histograms.</p><div><span>Upload · Inspect · Compare</span><button class="open-lab" type="button" data-lab="01" data-title="Image Fundamentals">Open lab</button></div></div>
               </article>
 
               <article class="lab-card" data-status="ready" data-search="image enhancement filters blur sharpen edge detection">
-                <div class="card-head"><span>LAB ACTIVITY 02</span><b class="status ready">Ready</b></div>
+                <div class="card-head"><span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 18V9M10 18V4M16 18v-6M22 18V7"/></svg>LAB ACTIVITY 02</span><b class="status ready">Ready</b></div>
                 <div class="card-visual edge" aria-hidden="true"><svg viewBox="0 0 400 150" preserveAspectRatio="none"><path d="M0 125 58 88 97 109 143 28 188 91 224 47 274 76 325 19 400 70"/><path d="M0 140 76 116 127 132 175 89 224 112 285 86 343 105 400 82"/></svg></div>
                 <div class="card-body"><p>Spatial filtering</p><h3>Image Enhancement</h3><p>Compare blur, sharpening, thresholding, and edge detection using adjustable controls.</p><div><span>Filter · Tune · Compare</span><button class="open-lab" type="button" data-lab="02" data-title="Image Enhancement">Open lab</button></div></div>
               </article>
 
               <article class="lab-card" data-status="planned" data-search="feature extraction keypoints descriptors sift orb">
-                <div class="card-head"><span>LAB ACTIVITY 03</span><b class="status planned">Planned</b></div>
+                <div class="card-head"><span><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="6" cy="7" r="2"/><circle cx="18" cy="6" r="2"/><circle cx="12" cy="17" r="2"/><path d="m8 8 3 7M16 7l-3 8M8 7h8"/></svg>LAB ACTIVITY 03</span><b class="status planned">Planned</b></div>
                 <div class="card-visual keypoints" aria-hidden="true"><i style="--x:18%;--y:25%"></i><i style="--x:32%;--y:62%"></i><i style="--x:45%;--y:35%"></i><i style="--x:58%;--y:72%"></i><i style="--x:75%;--y:26%"></i><i style="--x:83%;--y:61%"></i><i style="--x:64%;--y:42%"></i><i style="--x:25%;--y:79%"></i></div>
                 <div class="card-body"><p>Feature engineering</p><h3>Feature Extraction</h3><p>Locate keypoints and visualize descriptors across source and transformed images.</p><div><span>Detect · Match · Measure</span><button class="open-lab" type="button" data-lab="03" data-title="Feature Extraction">Preview</button></div></div>
               </article>
 
               <article class="lab-card" data-status="planned" data-search="object detection bounding box confidence video">
-                <div class="card-head"><span>LAB ACTIVITY 04</span><b class="status planned">Planned</b></div>
+                <div class="card-head"><span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/><circle cx="12" cy="12" r="3"/></svg>LAB ACTIVITY 04</span><b class="status planned">Planned</b></div>
                 <div class="card-visual boxes" aria-hidden="true"><i></i><i></i><span>OBJECT 92%</span></div>
                 <div class="card-body"><p>Visual recognition</p><h3>Object Detection</h3><p>Detect objects in images or video and review labels, boxes, and confidence scores.</p><div><span>Detect · Label · Track</span><button class="open-lab" type="button" data-lab="04" data-title="Object Detection">Preview</button></div></div>
               </article>
 
               <article class="lab-card" data-status="planned" data-search="segmentation masks regions pixels classes">
-                <div class="card-head"><span>LAB ACTIVITY 05</span><b class="status planned">Planned</b></div>
+                <div class="card-head"><span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m4 5 6-2 4 4 6-2v14l-6 2-4-4-6 2V5Z"/><path d="M10 3v14M14 7v14"/></svg>LAB ACTIVITY 05</span><b class="status planned">Planned</b></div>
                 <div class="card-visual segments" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
                 <div class="card-body"><p>Pixel classification</p><h3>Image Segmentation</h3><p>Separate images into meaningful regions and compare class masks side by side.</p><div><span>Segment · Mask · Inspect</span><button class="open-lab" type="button" data-lab="05" data-title="Image Segmentation">Preview</button></div></div>
               </article>
 
               <article class="lab-card" data-status="planned" data-search="neural network deep learning classifier prediction">
-                <div class="card-head"><span>LAB ACTIVITY 06</span><b class="status planned">Planned</b></div>
+                <div class="card-head"><span><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="5" r="2"/><circle cx="12" cy="19" r="2"/><circle cx="19" cy="12" r="2"/><path d="m7 11 3.5-4.5M7 13l3.5 4.5M13.5 6.5 17 11M13.5 17.5 17 13"/></svg>LAB ACTIVITY 06</span><b class="status planned">Planned</b></div>
                 <div class="card-visual network" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div>
                 <div class="card-body"><p>Deep learning</p><h3>Neural Networks</h3><p>Run a trained classifier and inspect predictions, probability, and model behavior.</p><div><span>Classify · Predict · Evaluate</span><button class="open-lab" type="button" data-lab="06" data-title="Neural Networks">Preview</button></div></div>
               </article>

@@ -4,7 +4,8 @@ A responsive laboratory dashboard for organizing and running all Computer Vision
 
 ## Current interface
 
-- Responsive dark navy / coral app interface inspired by the supplied visual reference
+- Responsive dark navy / coral app interface with persistent dark and light modes
+- Animated, code-native computer-vision telemetry display and interface icons
 - Dedicated dashboard and full laboratory experiment workspace
 - Laboratory archive with ready/planned filters
 - Reusable module preview with image upload, drag-and-drop, technique selection, and simulated processing state
@@ -27,5 +28,4 @@ Then visit `http://localhost:8000`.
 index.html               Main page and laboratory module shell
 styles.css               Responsive visual system
 script.js                Navigation, filtering, upload, and preview interactions
-assets/vision-student.png Original hero artwork
 ```

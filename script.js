@@ -17,9 +17,28 @@ const outputState = document.querySelector('#output-state');
 const intensity = document.querySelector('#intensity');
 const intensityOutput = document.querySelector('#intensity-output');
 const toast = document.querySelector('#toast');
+const themeToggle = document.querySelector('#theme-toggle');
+const themeColor = document.querySelector('meta[name="theme-color"]');
 let activeFilter = 'all';
 let uploadedImage = null;
 let toastTimer;
+
+function applyTheme(theme, announce = false) {
+  const isLight = theme === 'light';
+  document.documentElement.dataset.theme = theme;
+  themeToggle.setAttribute('aria-pressed', String(isLight));
+  themeToggle.setAttribute('aria-label', `Switch to ${isLight ? 'dark' : 'light'} mode`);
+  themeColor.setAttribute('content', isLight ? '#f4f6fb' : '#080e1b');
+  if (announce) showToast(`${isLight ? 'Light' : 'Dark'} mode enabled.`);
+}
+
+applyTheme(document.documentElement.dataset.theme || 'dark');
+
+themeToggle.addEventListener('click', () => {
+  const nextTheme = document.documentElement.dataset.theme === 'light' ? 'dark' : 'light';
+  try { localStorage.setItem('cvision-theme', nextTheme); } catch { /* Storage may be unavailable. */ }
+  applyTheme(nextTheme, true);
+});
 
 mobileMenu.addEventListener('click', () => {
   const open = sidebar.classList.toggle('open');

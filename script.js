@@ -28,6 +28,7 @@ let sourceImageData = null;
 let sourceFile = null;
 let activeResultCanvas = null;
 let cropSelection = null;
+let pcaDataset = [];
 let toastTimer;
 
 const labDefinitions = {
@@ -176,6 +177,134 @@ for index, (image, title) in enumerate(zip(images, titles)):
 
 plt.tight_layout()
 plt.show()`
+  },
+  '04': {
+    title: 'SURF Feature Detection', topic: 'HESSIAN KEYPOINTS & DESCRIPTORS', week: 'WEEK 6',
+    objective: 'Detect scale-aware interest points, study Hessian threshold sensitivity, and connect browser results to OpenCV SURF descriptors.',
+    selectLabel: 'Feature experiment', options: [['surf', 'SURF-style Hessian keypoints']],
+    procedure: ['Upload an object or scene image and convert it to grayscale.', 'Calculate multi-scale Hessian determinant responses and retain local maxima.', 'Change the Hessian threshold and observe how the keypoint count changes.', 'Inspect keypoint position, scale, and orientation overlays.', 'Use the Python reference to compute exact SURF descriptors and match two images.'],
+    findings: [
+      ['What does the Hessian threshold change?', 'A higher threshold accepts only stronger blob responses, so fewer keypoints remain. A lower value detects more points but may include unstable features.'],
+      ['Why are descriptors important?', 'They encode the neighborhood around each keypoint so corresponding features can be matched across scale, rotation, viewpoint, or lighting changes.'],
+      ['How do SURF, SIFT, and ORB differ?', 'SURF uses Hessian blob responses and is typically faster than SIFT; SIFT is highly distinctive; ORB is fast, binary, and license-friendly.']
+    ],
+    code: String.raw`import cv2
+
+img1 = cv2.imread('image1.jpg', cv2.IMREAD_GRAYSCALE)
+img2 = cv2.imread('image2.jpg', cv2.IMREAD_GRAYSCALE)
+surf = cv2.xfeatures2d.SURF_create(hessianThreshold=400, upright=False)
+kp1, des1 = surf.detectAndCompute(img1, None)
+kp2, des2 = surf.detectAndCompute(img2, None)
+
+matcher = cv2.BFMatcher(cv2.NORM_L2)
+matches = matcher.knnMatch(des1, des2, k=2)
+good = [m for m, n in matches if m.distance < 0.75 * n.distance]
+result = cv2.drawMatches(img1, kp1, img2, kp2, good, None,
+                         flags=cv2.DrawMatchesFlags_NOT_DRAW_SINGLE_POINTS)
+print('Keypoints:', len(kp1), len(kp2), 'Good matches:', len(good))
+cv2.imshow('SURF matches', result)
+cv2.waitKey(0)
+
+# Comparison alternatives
+sift = cv2.SIFT_create()
+orb = cv2.ORB_create()`
+  },
+  '05': {
+    title: 'PCA & Eigenfaces', topic: 'DIMENSIONALITY REDUCTION', week: 'WEEK 7–8',
+    objective: 'Create eigenfaces from multiple aligned face images and measure the trade-off between principal components and retained variance.',
+    selectLabel: 'PCA experiment', options: [['eigenfaces', 'Eigenfaces & reconstruction']],
+    procedure: ['Select at least three face images at once; each image is resized to a common 48×48 grayscale grid.', 'Center every flattened image by subtracting the mean face.', 'Compute principal components in sample space and convert them to eigenfaces.', 'Reconstruct the first face using the selected number of components.', 'Inspect cumulative explained variance, then use the Python reference for LFW PCA and SVM recognition.'],
+    findings: [
+      ['Why reduce dimensionality?', 'PCA replaces thousands of correlated pixels with a smaller set of high-variance features, reducing storage, computation, and overfitting.'],
+      ['What do early eigenfaces capture?', 'The first components usually represent broad lighting, face outline, and dominant eye or jaw placement; later components describe finer variations and noise.'],
+      ['What does whitening do?', 'It scales projected components to unit variance, preventing high-variance PCA directions from dominating an SVM solely because of numerical scale.']
+    ],
+    code: String.raw`from sklearn.datasets import fetch_lfw_people
+from sklearn.model_selection import train_test_split
+from sklearn.decomposition import PCA
+from sklearn.svm import SVC
+from sklearn.metrics import classification_report
+import matplotlib.pyplot as plt
+import numpy as np
+
+faces = fetch_lfw_people(min_faces_per_person=70, resize=0.4)
+X_train, X_test, y_train, y_test = train_test_split(
+    faces.data, faces.target, test_size=0.2, random_state=42, stratify=faces.target)
+
+pca = PCA(n_components=150, svd_solver='randomized', whiten=True, random_state=42)
+X_train_pca = pca.fit_transform(X_train)
+X_test_pca = pca.transform(X_test)
+eigenfaces = pca.components_.reshape((150, *faces.images.shape[1:]))
+
+clf = SVC(kernel='rbf', class_weight='balanced')
+clf.fit(X_train_pca, y_train)
+y_pred = clf.predict(X_test_pca)
+print(classification_report(y_test, y_pred, target_names=faces.target_names))
+
+variance = pca.explained_variance_ratio_.cumsum()
+print('Components for 90% variance:', np.searchsorted(variance, .90) + 1)
+plt.plot(np.arange(1, len(variance) + 1), variance)
+plt.axhline(.90, color='red', linestyle='--')
+plt.xlabel('Principal components'); plt.ylabel('Cumulative explained variance')
+plt.show()`
+  },
+  '06': {
+    title: 'YOLOv11 Object Detection', topic: 'OBJECT DETECTION & DATASETS', week: 'WEEK 8–9',
+    objective: 'Understand YOLO labels, visualize detections, and follow a complete Ultralytics YOLO11 inference, custom-training, and evaluation workflow.',
+    selectLabel: 'Detection activity', options: [['labels', 'YOLO label visualizer']],
+    procedure: ['Upload an image and enter class names plus YOLO-format labels.', 'Use one line per object: class_id x_center y_center width height confidence, normalized from 0 to 1.', 'Render and inspect each bounding box, class label, and confidence score.', 'Prepare images/labels train and validation folders plus data.yaml.', 'Run the supplied Python code for pretrained inference, custom training, validation, and testing.'],
+    findings: [
+      ['Detection vs classification?', 'Classification assigns a category to an entire image. Detection also localizes every object with a bounding box—for example, identifying three cars and their positions instead of only saying “car”.'],
+      ['Why normalize YOLO coordinates?', 'Normalized center, width, and height values make annotations independent of the image resolution.'],
+      ['Which metrics matter?', 'Precision measures detection correctness, recall measures coverage, and mAP summarizes precision-recall performance across classes and IoU thresholds.']
+    ],
+    code: String.raw`from ultralytics import YOLO
+
+# Pretrained inference (official weight name)
+model = YOLO('yolo11n.pt')
+results = model.predict(source='input.jpg', conf=0.25, save=True)
+for result in results:
+    print(result.boxes.xyxy, result.boxes.conf, result.boxes.cls)
+
+# Custom training: data.yaml points to images/train and images/val
+model.train(data='data.yaml', epochs=100, imgsz=640)
+metrics = model.val(data='data.yaml')
+print('mAP50-95:', metrics.box.map)
+
+# Use the best trained checkpoint on a new image
+best = YOLO('runs/detect/train/weights/best.pt')
+best.predict(source='new_image.jpg', conf=0.25, save=True)`
+  },
+  '07': {
+    title: 'Segmentation Techniques', topic: 'PIXEL & REGION SEGMENTATION', week: 'WEEK 13',
+    objective: 'Compare thresholding, region-based, edge-based, and color-cluster segmentation on the same uploaded image.',
+    selectLabel: 'Segmentation method', options: [['threshold', 'Thresholding (Otsu)'], ['region', 'Region growing'], ['edge', 'Edge-based segmentation'], ['clusters', 'Color clusters (semantic preparation)']],
+    procedure: ['Upload an image containing distinguishable objects or regions.', 'Apply Otsu thresholding and compare foreground/background separation.', 'Choose a seed point and tolerance for region growing.', 'Use Canny boundaries for edge-based segmentation.', 'Cluster pixels by color to illustrate the per-pixel labeling stage used before evaluating semantic models; use the Python reference for pretrained DeepLab.'],
+    findings: [
+      ['Thresholding', 'Advantage: simple and fast for high-contrast images. Limitation: struggles with uneven lighting and overlapping intensity distributions.'],
+      ['Region-based', 'Advantage: produces connected areas based on similarity. Limitation: results depend strongly on seed selection and tolerance.'],
+      ['Edge-based', 'Advantage: highlights object boundaries. Limitation: noise or broken edges can prevent closed regions.'],
+      ['Semantic segmentation', 'Advantage: gives every pixel a learned class label. Limitation: needs annotated data, substantial computation, and a trained model.']
+    ],
+    code: String.raw`import cv2
+from skimage.segmentation import flood
+
+img = cv2.imread('input.jpg')
+gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+_, otsu = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+adaptive = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
+                                 cv2.THRESH_BINARY, 11, 2)
+edges = cv2.Canny(gray, 100, 200)
+region = flood(gray, seed_point=(gray.shape[0] // 2, gray.shape[1] // 2), tolerance=20)
+
+cv2.imshow('Otsu', otsu)
+cv2.imshow('Adaptive', adaptive)
+cv2.imshow('Edges', edges)
+cv2.imshow('Region growing', (region * 255).astype('uint8'))
+cv2.waitKey(0)
+
+# Semantic extension: run a pretrained DeepLab or U-Net model and compare
+# pixel labels with ground truth using IoU = intersection / union.`
   }
 };
 
@@ -234,7 +363,9 @@ function openLab(number) {
   document.querySelector('#lab-week').textContent = definition.week;
   document.querySelector('#control-lab-number').textContent = number;
   document.querySelector('#technique-label').textContent = definition.selectLabel;
-  document.querySelector('#drop-zone small').textContent = number === '02' ? 'Use input.jpg · PNG, JPG, or WEBP' : 'PNG, JPG, or WEBP';
+  fileInput.multiple = number === '05';
+  document.querySelector('#drop-zone strong').textContent = number === '05' ? 'Select face images' : 'Drop image here';
+  document.querySelector('#drop-zone small').textContent = number === '02' ? 'Use input.jpg · PNG, JPG, or WEBP' : number === '05' ? 'Choose 3–20 PNG, JPG, or WEBP files' : 'PNG, JPG, or WEBP';
 
   technique.innerHTML = definition.options.map(([value, label]) => `<option value="${value}">${label}</option>`).join('');
   renderDynamicControls();
@@ -321,6 +452,28 @@ function renderDynamicControls() {
   } else if (currentLab === '03') {
     dynamicControls.innerHTML = rangeControl('clip-limit', 'CLAHE clip limit', 1, 5, 2, .5, '×') + `<div class="control-block"><label for="tile-grid">Adaptive tile grid</label><select id="tile-grid"><option value="4">4 × 4</option><option value="8" selected>8 × 8</option><option value="12">12 × 12</option></select></div>`;
     bindRangeOutputs();
+  } else if (currentLab === '04') {
+    dynamicControls.innerHTML = rangeControl('hessian-threshold', 'Hessian threshold', 5, 95, 45, 5, '%') + rangeControl('keypoint-limit', 'Maximum keypoints', 25, 300, 120, 25, '');
+    bindRangeOutputs();
+  } else if (currentLab === '05') {
+    const maxComponents = Math.max(1, Math.min(8, pcaDataset.length - 1));
+    dynamicControls.innerHTML = rangeControl('pca-components', 'Reconstruction components', 1, maxComponents, Math.min(3, maxComponents), 1, '') + `<div class="control-hint"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg><span>${pcaDataset.length ? `${pcaDataset.length} aligned face images loaded.` : 'Select at least three face images together.'}</span></div>`;
+    bindRangeOutputs();
+  } else if (currentLab === '06') {
+    dynamicControls.innerHTML = `<div class="control-block text-controls"><label for="yolo-classes">Class names (comma-separated)</label><input id="yolo-classes" type="text" value="person, car, bottle" spellcheck="false"><label for="yolo-labels">YOLO labels</label><textarea id="yolo-labels" rows="6" spellcheck="false" placeholder="0 0.50 0.50 0.35 0.70 0.92"></textarea><small>class_id x_center y_center width height confidence</small></div>`;
+  } else if (currentLab === '07') {
+    if (value === 'region') {
+      const maxX = Math.max(0, (sourceCanvas?.width || 1) - 1);
+      const maxY = Math.max(0, (sourceCanvas?.height || 1) - 1);
+      dynamicControls.innerHTML = `<div class="control-block compact-controls"><label>Seed coordinate</label><div class="field-row"><label>X<input id="seed-x" type="number" min="0" max="${maxX}" value="${Math.floor(maxX / 2)}"></label><label>Y<input id="seed-y" type="number" min="0" max="${maxY}" value="${Math.floor(maxY / 2)}"></label></div></div>` + rangeControl('region-tolerance', 'Intensity tolerance', 2, 80, 22, 2, '');
+    } else if (value === 'edge') {
+      dynamicControls.innerHTML = rangeControl('segment-edge-low', 'Canny low threshold', 0, 200, 55, 5, '') + rangeControl('segment-edge-high', 'Canny high threshold', 50, 255, 150, 5, '');
+    } else if (value === 'clusters') {
+      dynamicControls.innerHTML = rangeControl('cluster-count', 'Color clusters', 2, 6, 4, 1, '');
+    } else {
+      dynamicControls.innerHTML = `<div class="control-hint"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/></svg><span>Otsu automatically selects the threshold from the grayscale histogram.</span></div>`;
+    }
+    bindRangeOutputs();
   }
 }
 
@@ -372,13 +525,65 @@ function bindRangeOutputs() {
   dropZone.classList.remove('dragging');
 }));
 dropZone.addEventListener('drop', (event) => {
-  const [file] = event.dataTransfer.files;
-  if (file) loadImage(file);
+  const files = [...event.dataTransfer.files];
+  if (currentLab === '05') loadPcaDataset(files);
+  else if (files[0]) loadImage(files[0]);
 });
 fileInput.addEventListener('change', () => {
-  const [file] = fileInput.files;
-  if (file) loadImage(file);
+  const files = [...fileInput.files];
+  if (currentLab === '05') loadPcaDataset(files);
+  else if (files[0]) loadImage(files[0]);
 });
+
+async function loadPcaDataset(files) {
+  const images = files.filter((file) => file.type.startsWith('image/')).slice(0, 20);
+  if (images.length < 3) {
+    showToast('Select at least three face images for the PCA experiment.');
+    return;
+  }
+  try {
+    const loaded = await Promise.all(images.map((file) => new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onerror = reject;
+      reader.onload = (event) => {
+        const image = new Image();
+        image.onerror = reject;
+        image.onload = () => resolve({ file, image });
+        image.src = event.target.result;
+      };
+      reader.readAsDataURL(file);
+    })));
+    pcaDataset = loaded.map(({ image, file }) => {
+      const canvas = document.createElement('canvas');
+      canvas.width = 48; canvas.height = 48;
+      const context = canvas.getContext('2d', { willReadFrequently: true });
+      context.drawImage(image, 0, 0, 48, 48);
+      return { file, pixels: Float32Array.from(toGrayscale(context.getImageData(0, 0, 48, 48))) };
+    });
+    const first = loaded[0];
+    const scale = Math.min(1, 1000 / Math.max(first.image.naturalWidth, first.image.naturalHeight));
+    const width = Math.max(1, Math.round(first.image.naturalWidth * scale));
+    const height = Math.max(1, Math.round(first.image.naturalHeight * scale));
+    sourceCanvas = document.createElement('canvas');
+    sourceCanvas.width = width; sourceCanvas.height = height;
+    const context = sourceCanvas.getContext('2d', { willReadFrequently: true });
+    context.drawImage(first.image, 0, 0, width, height);
+    sourceImageData = context.getImageData(0, 0, width, height);
+    sourceFile = first.file;
+    document.querySelector('#metric-width').textContent = '48 (aligned)';
+    document.querySelector('#metric-height').textContent = '48 (aligned)';
+    document.querySelector('#metric-channels').textContent = `${pcaDataset.length} faces`;
+    document.querySelector('#metric-status').textContent = 'Ready';
+    outputState.textContent = `Dataset ready · ${pcaDataset.length} faces`;
+    runButton.disabled = false;
+    renderDynamicControls();
+    renderSourcePreview();
+    showToast(`${pcaDataset.length} face images loaded for PCA.`);
+  } catch (error) {
+    console.error(error);
+    showToast('One or more face images could not be loaded.');
+  }
+}
 
 function loadImage(file) {
   if (!file.type.startsWith('image/')) {
@@ -442,6 +647,10 @@ runButton.addEventListener('click', async () => {
     if (currentLab === '01') runLabOne();
     if (currentLab === '02') runLabTwo();
     if (currentLab === '03') runLabThree();
+    if (currentLab === '04') runLabFour();
+    if (currentLab === '05') runLabFive();
+    if (currentLab === '06') runLabSix();
+    if (currentLab === '07') runLabSeven();
     outputState.textContent = 'Experiment complete';
     document.querySelector('#metric-status').textContent = 'Complete';
     document.querySelector('#guide-progress').textContent = 'Experiment completed';
@@ -450,7 +659,7 @@ runButton.addEventListener('click', async () => {
     console.error(error);
     outputState.textContent = 'Processing error';
     document.querySelector('#metric-status').textContent = 'Error';
-    showToast('The image could not be processed. Try a smaller file.');
+    showToast(error.message || 'The image could not be processed. Try a smaller file.');
   } finally {
     processing.classList.remove('active');
     runButton.disabled = false;
@@ -573,6 +782,282 @@ function runLabThree() {
     activeResultCanvas = renderHistogramResult('Contrast stretching', 'Linear minimum–maximum scaling', stretched, width, height).canvas;
   }
   revealResults();
+}
+
+function runLabFour() {
+  const width = sourceCanvas.width;
+  const height = sourceCanvas.height;
+  const gray = gaussianBlur(toGrayscale(sourceImageData), width, height);
+  const response = new Float32Array(width * height);
+  const scaleMap = new Uint8Array(width * height);
+  let maximum = 1;
+  [1, 2, 4].forEach((radius) => {
+    for (let y = radius; y < height - radius; y++) {
+      for (let x = radius; x < width - radius; x++) {
+        const index = y * width + x;
+        const center = gray[index];
+        const dxx = gray[index - radius] - 2 * center + gray[index + radius];
+        const dyy = gray[index - radius * width] - 2 * center + gray[index + radius * width];
+        const dxy = (gray[(y + radius) * width + x + radius] - gray[(y + radius) * width + x - radius] - gray[(y - radius) * width + x + radius] + gray[(y - radius) * width + x - radius]) / 4;
+        const determinant = Math.abs(dxx * dyy - .81 * dxy * dxy) * radius;
+        if (determinant > response[index]) { response[index] = determinant; scaleMap[index] = radius; }
+        maximum = Math.max(maximum, determinant);
+      }
+    }
+  });
+  const thresholdPercent = Number(document.querySelector('#hessian-threshold').value);
+  const threshold = maximum * (.01 + thresholdPercent / 100 * .24);
+  const candidates = [];
+  for (let y = 2; y < height - 2; y += 2) {
+    for (let x = 2; x < width - 2; x += 2) {
+      const index = y * width + x;
+      if (response[index] < threshold) continue;
+      let localMaximum = true;
+      for (let oy = -2; oy <= 2 && localMaximum; oy++) for (let ox = -2; ox <= 2; ox++) if (response[(y + oy) * width + x + ox] > response[index]) { localMaximum = false; break; }
+      if (localMaximum) candidates.push({ x, y, response: response[index], scale: scaleMap[index] || 1 });
+    }
+  }
+  candidates.sort((a, b) => b.response - a.response);
+  const limit = Number(document.querySelector('#keypoint-limit').value);
+  const points = [];
+  for (const candidate of candidates) {
+    const minimumDistance = 5 + candidate.scale * 2;
+    if (points.every((point) => Math.hypot(point.x - candidate.x, point.y - candidate.y) > minimumDistance)) points.push(candidate);
+    if (points.length >= limit) break;
+  }
+  const responseDisplay = new Uint8ClampedArray(response.length);
+  for (let index = 0; index < response.length; index++) responseDisplay[index] = Math.round(Math.sqrt(response[index] / maximum) * 255);
+  clearResults();
+  renderGrayResult('Hessian response', 'Bright pixels are strong blob responses', responseDisplay, width, height);
+  const overlay = createResultCard('SURF-style keypoints', `${points.length} points · threshold ${thresholdPercent}%`, width, height);
+  overlay.context.drawImage(sourceCanvas, 0, 0);
+  overlay.context.lineWidth = Math.max(1.5, Math.min(width, height) / 350);
+  points.forEach((point) => {
+    const radius = 4 + point.scale * 2;
+    const gx = gray[point.y * width + point.x + 1] - gray[point.y * width + point.x - 1];
+    const gy = gray[(point.y + 1) * width + point.x] - gray[(point.y - 1) * width + point.x];
+    const angle = Math.atan2(gy, gx);
+    overlay.context.strokeStyle = '#ff4f8b';
+    overlay.context.beginPath(); overlay.context.arc(point.x, point.y, radius, 0, Math.PI * 2); overlay.context.stroke();
+    overlay.context.strokeStyle = '#45e5df';
+    overlay.context.beginPath(); overlay.context.moveTo(point.x, point.y); overlay.context.lineTo(point.x + Math.cos(angle) * radius, point.y + Math.sin(angle) * radius); overlay.context.stroke();
+  });
+  activeResultCanvas = overlay.canvas;
+  appendAnalysis('SURF INTERPRETATION', `Detected ${points.length} stable local maxima. Increase the Hessian threshold to keep only stronger structures; decrease it to retain more weak or textured points.`, 'The browser overlay demonstrates Hessian keypoint selection. Exact patented SURF descriptors and image matching are provided in the Python/OpenCV reference below.');
+  revealResults();
+}
+
+function runLabFive() {
+  if (pcaDataset.length < 3) throw new Error('At least three aligned images are required.');
+  const samples = pcaDataset.map((item) => item.pixels);
+  const count = samples.length;
+  const dimensions = samples[0].length;
+  const mean = new Float32Array(dimensions);
+  samples.forEach((sample) => { for (let d = 0; d < dimensions; d++) mean[d] += sample[d] / count; });
+  const centered = samples.map((sample) => Float32Array.from(sample, (value, d) => value - mean[d]));
+  const gram = Array.from({ length: count }, () => new Float64Array(count));
+  for (let row = 0; row < count; row++) for (let column = row; column < count; column++) {
+    let sum = 0;
+    for (let d = 0; d < dimensions; d++) sum += centered[row][d] * centered[column][d];
+    gram[row][column] = gram[column][row] = sum / Math.max(1, count - 1);
+  }
+  const requested = Math.min(Number(document.querySelector('#pca-components').value), count - 1);
+  const eigenvectors = [];
+  const eigenvalues = [];
+  const components = [];
+  for (let componentIndex = 0; componentIndex < Math.min(Math.max(requested, 4), count - 1); componentIndex++) {
+    let vector = Float64Array.from({ length: count }, (_, index) => Math.sin((index + 1) * (componentIndex + 1) * 1.37));
+    for (let iteration = 0; iteration < 80; iteration++) {
+      const next = new Float64Array(count);
+      for (let row = 0; row < count; row++) for (let column = 0; column < count; column++) next[row] += gram[row][column] * vector[column];
+      eigenvectors.forEach((previous) => {
+        let projection = 0; for (let index = 0; index < count; index++) projection += next[index] * previous[index];
+        for (let index = 0; index < count; index++) next[index] -= projection * previous[index];
+      });
+      const norm = Math.hypot(...next) || 1;
+      vector = Float64Array.from(next, (value) => value / norm);
+    }
+    let eigenvalue = 0;
+    for (let row = 0; row < count; row++) for (let column = 0; column < count; column++) eigenvalue += vector[row] * gram[row][column] * vector[column];
+    if (eigenvalue < 1e-7) break;
+    const face = new Float32Array(dimensions);
+    for (let d = 0; d < dimensions; d++) for (let sample = 0; sample < count; sample++) face[d] += vector[sample] * centered[sample][d];
+    const faceNorm = Math.hypot(...face) || 1;
+    for (let d = 0; d < dimensions; d++) face[d] /= faceNorm;
+    eigenvectors.push(vector); eigenvalues.push(eigenvalue); components.push(face);
+  }
+  const used = Math.min(requested, components.length);
+  const reconstruction = Float32Array.from(mean);
+  for (let component = 0; component < used; component++) {
+    let weight = 0;
+    for (let d = 0; d < dimensions; d++) weight += centered[0][d] * components[component][d];
+    for (let d = 0; d < dimensions; d++) reconstruction[d] += weight * components[component][d];
+  }
+  const trace = gram.reduce((sum, row, index) => sum + row[index], 0) || 1;
+  const retained = eigenvalues.slice(0, used).reduce((sum, value) => sum + value, 0) / trace * 100;
+  clearResults();
+  renderGrayResult('Mean face', `${count} aligned samples`, Uint8ClampedArray.from(mean, (value) => clamp(value, 0, 255)), 48, 48);
+  components.slice(0, 3).forEach((face, index) => renderGrayResult(`Eigenface ${index + 1}`, `PC${index + 1} · ${(eigenvalues[index] / trace * 100).toFixed(1)}% variance`, normalizeSigned(face), 48, 48));
+  activeResultCanvas = renderGrayResult('Reconstructed face', `${used} components · ${retained.toFixed(1)}% retained variance`, Uint8ClampedArray.from(reconstruction, (value) => clamp(value, 0, 255)), 48, 48).canvas;
+  appendAnalysis('PCA ANALYSIS', `${used} principal component${used === 1 ? '' : 's'} retain ${retained.toFixed(1)}% of this uploaded dataset's variance.`, 'More components improve reconstruction but reduce compression. The full LFW + whitening + SVM recognition workflow is available in the Python reference.');
+  revealResults();
+}
+
+function runLabSix() {
+  const names = document.querySelector('#yolo-classes').value.split(',').map((name) => name.trim()).filter(Boolean);
+  const lines = document.querySelector('#yolo-labels').value.split(/\r?\n/).map((line) => line.trim()).filter(Boolean);
+  if (!lines.length) throw new Error('Enter at least one YOLO label line.');
+  const detections = lines.map((line, lineIndex) => {
+    const values = line.split(/\s+/).map(Number);
+    if (values.length < 5 || values.some((value) => !Number.isFinite(value))) throw new Error(`Invalid YOLO label on line ${lineIndex + 1}.`);
+    const [classId, centerX, centerY, boxWidth, boxHeight, confidence = 1] = values;
+    if ([centerX, centerY, boxWidth, boxHeight].some((value) => value < 0 || value > 1)) throw new Error(`Coordinates on line ${lineIndex + 1} must be normalized 0–1.`);
+    return { classId: Math.round(classId), centerX, centerY, boxWidth, boxHeight, confidence };
+  });
+  clearResults();
+  const original = createResultCard('Original image', 'Input for YOLO annotation review', sourceCanvas.width, sourceCanvas.height);
+  original.context.drawImage(sourceCanvas, 0, 0);
+  const result = createResultCard('YOLO detections', `${detections.length} object${detections.length === 1 ? '' : 's'}`, sourceCanvas.width, sourceCanvas.height);
+  result.context.drawImage(sourceCanvas, 0, 0);
+  const lineWidth = Math.max(2, Math.min(sourceCanvas.width, sourceCanvas.height) / 250);
+  result.context.lineWidth = lineWidth;
+  result.context.font = `700 ${Math.max(12, Math.round(Math.min(sourceCanvas.width, sourceCanvas.height) / 35))}px monospace`;
+  detections.forEach((box, index) => {
+    const width = box.boxWidth * sourceCanvas.width;
+    const height = box.boxHeight * sourceCanvas.height;
+    const x = box.centerX * sourceCanvas.width - width / 2;
+    const y = box.centerY * sourceCanvas.height - height / 2;
+    const color = ['#ff4f8b', '#45e5df', '#ffd166', '#9d7cff'][index % 4];
+    const label = `${names[box.classId] || `class ${box.classId}`} ${(box.confidence * 100).toFixed(0)}%`;
+    result.context.strokeStyle = color; result.context.fillStyle = color;
+    result.context.strokeRect(x, y, width, height);
+    const textWidth = result.context.measureText(label).width + 12;
+    const textHeight = Math.max(20, Math.round(Math.min(sourceCanvas.width, sourceCanvas.height) / 24));
+    result.context.fillRect(x, Math.max(0, y - textHeight), textWidth, textHeight);
+    result.context.fillStyle = '#07101d'; result.context.fillText(label, x + 6, Math.max(15, y - 5));
+  });
+  activeResultCanvas = result.canvas;
+  appendAnalysis('YOLO WORKFLOW', `${detections.length} normalized annotation${detections.length === 1 ? '' : 's'} converted to pixel-space bounding boxes.`, 'This visualizer validates YOLO-format labels. Actual pretrained inference and custom-model training run through Ultralytics using the Python reference; the interface does not claim to fabricate model predictions.');
+  revealResults();
+}
+
+function runLabSeven() {
+  const width = sourceCanvas.width;
+  const height = sourceCanvas.height;
+  const gray = toGrayscale(sourceImageData);
+  const method = technique.value;
+  clearResults();
+  const original = createResultCard('Original image', 'Shared segmentation input', width, height);
+  original.context.drawImage(sourceCanvas, 0, 0);
+  if (method === 'threshold') {
+    const threshold = otsuThreshold(gray);
+    const mask = Uint8ClampedArray.from(gray, (value) => value >= threshold ? 255 : 0);
+    activeResultCanvas = renderGrayResult('Otsu threshold', `Automatic threshold: ${threshold}`, mask, width, height).canvas;
+    appendAnalysis('THRESHOLDING', `Otsu selected intensity ${threshold}; ${(mask.reduce((sum, value) => sum + (value === 255), 0) / mask.length * 100).toFixed(1)}% of pixels are foreground.`, 'Fast and effective for bimodal, high-contrast scenes; uneven lighting can merge foreground and background distributions.');
+  } else if (method === 'region') {
+    const seedX = clamp(Number(document.querySelector('#seed-x').value), 0, width - 1);
+    const seedY = clamp(Number(document.querySelector('#seed-y').value), 0, height - 1);
+    const tolerance = Number(document.querySelector('#region-tolerance').value);
+    const mask = regionGrow(gray, width, height, seedX, seedY, tolerance);
+    activeResultCanvas = renderGrayResult('Region growing', `Seed (${seedX}, ${seedY}) · tolerance ${tolerance}`, mask, width, height).canvas;
+    appendAnalysis('REGION-BASED', 'Connected neighboring pixels are accepted when their intensity remains close to the selected seed.', 'Seed placement and tolerance control the result; a poor seed can select the wrong region or leak into nearby objects.');
+  } else if (method === 'edge') {
+    const low = Number(document.querySelector('#segment-edge-low').value);
+    const high = Number(document.querySelector('#segment-edge-high').value);
+    const edges = cannyFromSobel(sobel(gaussianBlur(gray, width, height), width, height), width, height, Math.min(low, high - 1), Math.max(high, low + 1));
+    activeResultCanvas = renderGrayResult('Edge boundaries', `Canny thresholds ${low} / ${high}`, edges, width, height).canvas;
+    appendAnalysis('EDGE-BASED', 'Canny marks likely boundaries after smoothing, gradient analysis, thinning, and hysteresis tracking.', 'Clean closed edges can outline objects; noise, weak contrast, or gaps make complete region formation difficult.');
+  } else {
+    const clusters = Number(document.querySelector('#cluster-count').value);
+    const clustered = colorKMeans(sourceImageData.data, width, height, clusters);
+    activeResultCanvas = renderImageDataResult('Color clusters', `${clusters} pixel groups`, clustered, width, height).canvas;
+    appendAnalysis('SEMANTIC PREPARATION', `Pixels were assigned to ${clusters} visual color groups. Each color represents a cluster, not a learned object class.`, 'True semantic segmentation uses a trained DeepLab or U-Net to label pixels with meanings such as person, road, or sky. This local clustering demonstrates the per-pixel label map without misrepresenting it as a neural model.');
+  }
+  revealResults();
+}
+
+function appendAnalysis(title, primary, secondary) {
+  const note = document.createElement('article');
+  note.className = 'analysis-note';
+  note.innerHTML = `<span>${title}</span><p><strong>${primary}</strong></p><p>${secondary}</p>`;
+  resultGrid.appendChild(note);
+}
+
+function normalizeSigned(values) {
+  let minimum = Infinity; let maximum = -Infinity;
+  values.forEach((value) => { minimum = Math.min(minimum, value); maximum = Math.max(maximum, value); });
+  const range = maximum - minimum || 1;
+  return Uint8ClampedArray.from(values, (value) => (value - minimum) / range * 255);
+}
+
+function otsuThreshold(input) {
+  const histogram = calculateHistogram(input);
+  let totalSum = 0; for (let value = 0; value < 256; value++) totalSum += value * histogram[value];
+  let backgroundWeight = 0; let backgroundSum = 0; let bestVariance = -1; let bestThreshold = 0;
+  for (let value = 0; value < 256; value++) {
+    backgroundWeight += histogram[value];
+    if (!backgroundWeight) continue;
+    const foregroundWeight = input.length - backgroundWeight;
+    if (!foregroundWeight) break;
+    backgroundSum += value * histogram[value];
+    const meanBackground = backgroundSum / backgroundWeight;
+    const meanForeground = (totalSum - backgroundSum) / foregroundWeight;
+    const variance = backgroundWeight * foregroundWeight * (meanBackground - meanForeground) ** 2;
+    if (variance > bestVariance) { bestVariance = variance; bestThreshold = value; }
+  }
+  return bestThreshold;
+}
+
+function regionGrow(gray, width, height, seedX, seedY, tolerance) {
+  const output = new Uint8ClampedArray(gray.length);
+  const visited = new Uint8Array(gray.length);
+  const queue = new Int32Array(gray.length);
+  const seedValue = gray[seedY * width + seedX];
+  let head = 0; let tail = 0;
+  queue[tail++] = seedY * width + seedX;
+  visited[seedY * width + seedX] = 1;
+  while (head < tail) {
+    const index = queue[head++]; output[index] = 255;
+    const x = index % width; const y = Math.floor(index / width);
+    const neighbors = [index - 1, index + 1, index - width, index + width];
+    for (let n = 0; n < 4; n++) {
+      const neighbor = neighbors[n];
+      if (neighbor < 0 || neighbor >= gray.length || visited[neighbor]) continue;
+      const nx = neighbor % width; const ny = Math.floor(neighbor / width);
+      if (Math.abs(nx - x) + Math.abs(ny - y) !== 1) continue;
+      visited[neighbor] = 1;
+      if (Math.abs(gray[neighbor] - seedValue) <= tolerance) queue[tail++] = neighbor;
+    }
+  }
+  return output;
+}
+
+function colorKMeans(rgba, width, height, clusterCount) {
+  const pixels = width * height;
+  const centroids = Array.from({ length: clusterCount }, (_, index) => {
+    const source = Math.floor((index + .5) / clusterCount * (pixels - 1)) * 4;
+    return [rgba[source], rgba[source + 1], rgba[source + 2]];
+  });
+  const labels = new Uint8Array(pixels);
+  for (let iteration = 0; iteration < 6; iteration++) {
+    const sums = Array.from({ length: clusterCount }, () => [0, 0, 0, 0]);
+    for (let pixel = 0; pixel < pixels; pixel++) {
+      const source = pixel * 4; let best = 0; let bestDistance = Infinity;
+      for (let cluster = 0; cluster < clusterCount; cluster++) {
+        const dr = rgba[source] - centroids[cluster][0]; const dg = rgba[source + 1] - centroids[cluster][1]; const db = rgba[source + 2] - centroids[cluster][2];
+        const distance = dr * dr + dg * dg + db * db;
+        if (distance < bestDistance) { bestDistance = distance; best = cluster; }
+      }
+      labels[pixel] = best; sums[best][0] += rgba[source]; sums[best][1] += rgba[source + 1]; sums[best][2] += rgba[source + 2]; sums[best][3]++;
+    }
+    sums.forEach((sum, cluster) => { if (sum[3]) centroids[cluster] = [sum[0] / sum[3], sum[1] / sum[3], sum[2] / sum[3]]; });
+  }
+  const output = new Uint8ClampedArray(rgba.length);
+  for (let pixel = 0; pixel < pixels; pixel++) {
+    const target = pixel * 4; const color = centroids[labels[pixel]];
+    output[target] = color[0]; output[target + 1] = color[1]; output[target + 2] = color[2]; output[target + 3] = 255;
+  }
+  return output;
 }
 
 function clearResults() {
@@ -958,6 +1443,7 @@ function resetOutput() {
   sourceCanvas = null;
   sourceImageData = null;
   sourceFile = null;
+  pcaDataset = [];
   activeResultCanvas = null;
   cropSelection = null;
   fileInput.value = '';

@@ -39,16 +39,17 @@
           <button class="nav-item" type="button" data-view="all-labs">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 3h6M10 3v5l-5 9a3 3 0 0 0 3 4h8a3 3 0 0 0 3-4l-5-9V3M8 14h8" /></svg>
             All activities
-            <span>6</span>
+            <span>7</span>
           </button>
 
           <p>Lab activities</p>
           <button class="nav-item lab-nav" type="button" data-lab="01" data-title="Image Fundamentals"><b>01</b> Image Fundamentals <i class="ready-dot"></i></button>
           <button class="nav-item lab-nav" type="button" data-lab="02" data-title="Edge Detection"><b>02</b> Edge Detection <i class="ready-dot"></i></button>
           <button class="nav-item lab-nav" type="button" data-lab="03" data-title="Histogram Equalization"><b>03</b> Histogram Equalization <i class="ready-dot"></i></button>
-          <button class="nav-item lab-nav" type="button" data-lab="04" data-title="Object Detection"><b>04</b> Object Detection</button>
-          <button class="nav-item lab-nav" type="button" data-lab="05" data-title="Image Segmentation"><b>05</b> Image Segmentation</button>
-          <button class="nav-item lab-nav" type="button" data-lab="06" data-title="Neural Networks"><b>06</b> Neural Networks</button>
+          <button class="nav-item lab-nav" type="button" data-lab="04" data-title="SURF Features"><b>04</b> SURF Features <i class="ready-dot"></i></button>
+          <button class="nav-item lab-nav" type="button" data-lab="05" data-title="PCA Eigenfaces"><b>05</b> PCA Eigenfaces <i class="ready-dot"></i></button>
+          <button class="nav-item lab-nav" type="button" data-lab="06" data-title="YOLOv11 Detection"><b>06</b> YOLOv11 Detection <i class="ready-dot"></i></button>
+          <button class="nav-item lab-nav" type="button" data-lab="07" data-title="Image Segmentation"><b>07</b> Image Segmentation <i class="ready-dot"></i></button>
         </nav>
 
         <div class="sidebar-footer">
@@ -107,9 +108,9 @@
                 <div class="sim-footer"><span>OBJECTS <b>03</b></span><span>CONFIDENCE <b>98.2%</b></span><span>FPS <b>60</b></span></div>
               </div>
               <div class="banner-stats">
-                <div><strong>03</strong><span>Interfaces ready</span></div>
-                <div><strong>06</strong><span>Activities registered</span></div>
-                <div><strong>50%</strong><span>UI completion</span></div>
+                <div><strong>07</strong><span>Interfaces ready</span></div>
+                <div><strong>07</strong><span>Activities registered</span></div>
+                <div><strong>100%</strong><span>UI completion</span></div>
               </div>
             </div>
 
@@ -141,22 +142,28 @@
                 <div class="card-body"><p>Contrast enhancement</p><h3>Histogram Equalization</h3><p>Compare original contrast, global equalization, contrast stretching, and adaptive CLAHE.</p><div><span>Measure · Equalize · Analyze</span><button class="open-lab" type="button" data-lab="03" data-title="Histogram Equalization">Open lab</button></div></div>
               </article>
 
-              <article class="lab-card" data-status="planned" data-search="object detection bounding box confidence video">
-                <div class="card-head"><span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/><circle cx="12" cy="12" r="3"/></svg>LAB ACTIVITY 04</span><b class="status planned">Planned</b></div>
-                <div class="card-visual boxes" aria-hidden="true"><i></i><i></i><span>OBJECT 92%</span></div>
-                <div class="card-body"><p>Visual recognition</p><h3>Object Detection</h3><p>Detect objects in images or video and review labels, boxes, and confidence scores.</p><div><span>Detect · Label · Track</span><button class="open-lab" type="button" data-lab="04" data-title="Object Detection">Preview</button></div></div>
+              <article class="lab-card" data-status="ready" data-search="surf features keypoints hessian descriptors opencv">
+                <div class="card-head"><span><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="5" r="2"/><circle cx="12" cy="19" r="2"/><circle cx="19" cy="12" r="2"/><path d="m7 11 3.5-4.5M7 13l3.5 4.5M13.5 6.5 17 11M13.5 17.5 17 13"/></svg>LAB ACTIVITY 04</span><b class="status ready">Ready</b></div>
+                <div class="card-visual keypoints" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+                <div class="card-body"><p>Local features</p><h3>SURF Feature Detection</h3><p>Explore Hessian responses, threshold sensitivity, keypoint scale, and orientation.</p><div><span>Detect · Describe · Compare</span><button class="open-lab" type="button" data-lab="04" data-title="SURF Features">Open lab</button></div></div>
               </article>
 
-              <article class="lab-card" data-status="planned" data-search="segmentation masks regions pixels classes">
-                <div class="card-head"><span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m4 5 6-2 4 4 6-2v14l-6 2-4-4-6 2V5Z"/><path d="M10 3v14M14 7v14"/></svg>LAB ACTIVITY 05</span><b class="status planned">Planned</b></div>
+              <article class="lab-card" data-status="ready" data-search="pca eigenfaces dimensionality variance svm face recognition">
+                <div class="card-head"><span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19V9M8 19V5M12 19v-7M16 19V3M20 19v-5"/></svg>LAB ACTIVITY 05</span><b class="status ready">Ready</b></div>
+                <div class="card-visual histogram histogram-wide" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+                <div class="card-body"><p>Dimensionality reduction</p><h3>PCA &amp; Eigenfaces</h3><p>Build a small face dataset, calculate principal components, and inspect reconstruction quality.</p><div><span>Center · Project · Reconstruct</span><button class="open-lab" type="button" data-lab="05" data-title="PCA Eigenfaces">Open lab</button></div></div>
+              </article>
+
+              <article class="lab-card" data-status="ready" data-search="yolo yolo11 object detection bounding boxes annotations confidence">
+                <div class="card-head"><span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5"/><circle cx="12" cy="12" r="3"/></svg>LAB ACTIVITY 06</span><b class="status ready">Ready</b></div>
+                <div class="card-visual boxes" aria-hidden="true"><i></i><i></i><span>YOLO 92%</span></div>
+                <div class="card-body"><p>Object detection</p><h3>YOLOv11 Detection</h3><p>Inspect normalized YOLO labels, bounding boxes, confidence, and the full training workflow.</p><div><span>Annotate · Detect · Evaluate</span><button class="open-lab" type="button" data-lab="06" data-title="YOLOv11 Detection">Open lab</button></div></div>
+              </article>
+
+              <article class="lab-card" data-status="ready" data-search="segmentation threshold otsu region growing edge semantic kmeans">
+                <div class="card-head"><span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m4 5 6-2 4 4 6-2v14l-6 2-4-4-6 2V5Z"/><path d="M10 3v14M14 7v14"/></svg>LAB ACTIVITY 07</span><b class="status ready">Ready</b></div>
                 <div class="card-visual segments" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
-                <div class="card-body"><p>Pixel classification</p><h3>Image Segmentation</h3><p>Separate images into meaningful regions and compare class masks side by side.</p><div><span>Segment · Mask · Inspect</span><button class="open-lab" type="button" data-lab="05" data-title="Image Segmentation">Preview</button></div></div>
-              </article>
-
-              <article class="lab-card" data-status="planned" data-search="neural network deep learning classifier prediction">
-                <div class="card-head"><span><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="5" r="2"/><circle cx="12" cy="19" r="2"/><circle cx="19" cy="12" r="2"/><path d="m7 11 3.5-4.5M7 13l3.5 4.5M13.5 6.5 17 11M13.5 17.5 17 13"/></svg>LAB ACTIVITY 06</span><b class="status planned">Planned</b></div>
-                <div class="card-visual network" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div>
-                <div class="card-body"><p>Deep learning</p><h3>Neural Networks</h3><p>Run a trained classifier and inspect predictions, probability, and model behavior.</p><div><span>Classify · Predict · Evaluate</span><button class="open-lab" type="button" data-lab="06" data-title="Neural Networks">Preview</button></div></div>
+                <div class="card-body"><p>Pixel classification</p><h3>Segmentation Techniques</h3><p>Compare thresholding, region growing, edge-based, and color-cluster segmentation.</p><div><span>Segment · Mask · Compare</span><button class="open-lab" type="button" data-lab="07" data-title="Image Segmentation">Open lab</button></div></div>
               </article>
             </div>
           </section>

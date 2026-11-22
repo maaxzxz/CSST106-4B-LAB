@@ -13,6 +13,10 @@ A responsive laboratory dashboard for organizing and running all Computer Vision
 - Completed Lab 01 image manipulation: grayscale/channels, pixel editing, crop, resize, and rotation
 - Completed Lab 02 edge detection: Gaussian blur, Sobel magnitude, and Canny edge tracking
 - Completed Lab 03 contrast enhancement: histograms, global equalization, stretching, and CLAHE
+- Completed Lab 04 SURF feature exploration: multi-scale Hessian responses, keypoint thresholding, and OpenCV matching reference
+- Completed Lab 05 PCA and Eigenfaces: multi-image upload, principal components, explained variance, and reconstruction
+- Completed Lab 06 YOLOv11 workflow: normalized annotation inspection plus Ultralytics inference, training, and validation reference
+- Completed Lab 07 segmentation: Otsu thresholding, region growing, Canny boundaries, and color-cluster pixel labeling
 - Embedded procedures, observations, answers, and Python/OpenCV reference code from the laboratory specifications
 - Three additional activity slots ready for future Computer Vision modules
 

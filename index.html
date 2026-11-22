@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="CSST 106 computer vision laboratory workspace." />
+    <meta name="theme-color" content="#080e1b" />
+    <title>CVision Lab — CSST 106</title>
+    <link rel="stylesheet" href="styles.css" />
+    <script src="script.js" defer></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Skip to workspace</a>
+
+    <div class="app-shell">
+      <aside class="sidebar" id="sidebar">
+        <a class="brand" href="#" aria-label="CVision Lab dashboard">
+          <span class="brand-icon" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+          <span><strong>CVISION</strong><small>LAB · 4B</small></span>
+        </a>
+
+        <nav class="side-nav" aria-label="Laboratory navigation">
+          <p>Workspace</p>
+          <button class="nav-item is-active" type="button" data-view="dashboard">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z" /></svg>
+            Dashboard
+          </button>
+          <button class="nav-item" type="button" data-view="all-labs">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 3h6M10 3v5l-5 9a3 3 0 0 0 3 4h8a3 3 0 0 0 3-4l-5-9V3M8 14h8" /></svg>
+            All activities
+            <span>6</span>
+          </button>
+
+          <p>Lab activities</p>
+          <button class="nav-item lab-nav" type="button" data-lab="01" data-title="Image Fundamentals"><b>01</b> Image Fundamentals <i class="ready-dot"></i></button>
+          <button class="nav-item lab-nav" type="button" data-lab="02" data-title="Image Enhancement"><b>02</b> Image Enhancement <i class="ready-dot"></i></button>
+          <button class="nav-item lab-nav" type="button" data-lab="03" data-title="Feature Extraction"><b>03</b> Feature Extraction</button>
+          <button class="nav-item lab-nav" type="button" data-lab="04" data-title="Object Detection"><b>04</b> Object Detection</button>
+          <button class="nav-item lab-nav" type="button" data-lab="05" data-title="Image Segmentation"><b>05</b> Image Segmentation</button>
+          <button class="nav-item lab-nav" type="button" data-lab="06" data-title="Neural Networks"><b>06</b> Neural Networks</button>
+        </nav>
+
+        <div class="sidebar-footer">
+          <div class="course-chip"><span>CS</span><div><strong>CSST 106</strong><small>Computer Vision</small></div></div>
+          <a href="https://github.com/maaxzxz/CSST106-4B-LAB" target="_blank" rel="noreferrer" aria-label="Open GitHub repository">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2a10 10 0 0 0-3.2 19.5c.5.1.7-.2.7-.5v-1.9c-2.8.6-3.4-1.2-3.4-1.2-.5-1.1-1.1-1.4-1.1-1.4-.9-.6.1-.6.1-.6 1 0 1.5 1 1.5 1 .9 1.6 2.4 1.1 3 .9.1-.7.3-1.1.6-1.4-2.2-.2-4.6-1.1-4.6-4.9 0-1.1.4-2 1-2.7-.1-.3-.4-1.3.1-2.6 0 0 .8-.3 2.8 1a9.5 9.5 0 0 1 5 0c2-1.3 2.8-1 2.8-1 .5 1.3.2 2.3.1 2.6.6.7 1 1.6 1 2.7 0 3.8-2.4 4.7-4.6 4.9.4.3.7.9.7 1.8V21c0 .3.2.6.7.5A10 10 0 0 0 12 2Z" /></svg>
+          </a>
+        </div>
+      </aside>
+
+      <div class="app-area">
+        <header class="topbar">
+          <button class="mobile-menu" type="button" aria-controls="sidebar" aria-expanded="false"><span></span><span></span><span></span><i class="sr-only">Open menu</i></button>
+          <div class="breadcrumb"><span>CSST 106</span><i>/</i><strong id="page-label">Dashboard</strong></div>
+          <div class="top-actions">
+            <label class="search-box">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m16 16 5 5" /></svg>
+              <input type="search" id="lab-search" placeholder="Search activities" aria-label="Search activities" />
+              <kbd>⌘ K</kbd>
+            </label>
+            <button class="icon-button" type="button" aria-label="Notifications">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4" /></svg><i></i>
+            </button>
+            <div class="avatar" aria-label="Section 4B">4B</div>
+          </div>
+        </header>
+
+        <main id="main">
+          <section class="dashboard-view" id="dashboard-view">
+            <div class="welcome-banner">
+              <div class="banner-grid" aria-hidden="true"></div>
+              <div class="banner-copy">
+                <p><span></span> COMPUTER VISION LABORATORY</p>
+                <h1>See data.<br /><em>Understand vision.</em></h1>
+                <p class="banner-description">Run, document, and review every CSST 106 laboratory activity from one focused workspace.</p>
+                <div class="banner-actions">
+                  <button class="primary-button" id="continue-button" type="button">Continue Lab 01</button>
+                  <a href="#activities">View all activities</a>
+                </div>
+              </div>
+              <div class="hero-art">
+                <div class="scan-box" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+                <div class="scan-label"><span></span> TRACKING ACTIVE</div>
+                <img src="assets/vision-student.png" alt="Student using a futuristic computer vision visor" />
+              </div>
+              <div class="banner-stats">
+                <div><strong>02</strong><span>Interfaces ready</span></div>
+                <div><strong>06</strong><span>Activities registered</span></div>
+                <div><strong>33%</strong><span>UI completion</span></div>
+              </div>
+            </div>
+
+            <div class="section-row" id="activities">
+              <div><p class="section-kicker">ACTIVITY DIRECTORY</p><h2>Laboratory activities</h2></div>
+              <div class="filter-tabs" role="group" aria-label="Filter activities">
+                <button class="filter-tab is-active" type="button" data-filter="all">All</button>
+                <button class="filter-tab" type="button" data-filter="ready">Ready</button>
+                <button class="filter-tab" type="button" data-filter="planned">Planned</button>
+              </div>
+            </div>
+
+            <div class="lab-grid" id="lab-grid">
+              <article class="lab-card featured" data-status="ready" data-search="image fundamentals pixels color channels histogram">
+                <div class="card-head"><span>LAB ACTIVITY 01</span><b class="status ready">Ready</b></div>
+                <div class="card-visual histogram" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+                <div class="card-body"><p>Image processing</p><h3>Image Fundamentals</h3><p>Inspect image properties, RGB channels, grayscale conversion, and intensity histograms.</p><div><span>Upload · Inspect · Compare</span><button class="open-lab" type="button" data-lab="01" data-title="Image Fundamentals">Open lab</button></div></div>
+              </article>
+
+              <article class="lab-card" data-status="ready" data-search="image enhancement filters blur sharpen edge detection">
+                <div class="card-head"><span>LAB ACTIVITY 02</span><b class="status ready">Ready</b></div>
+                <div class="card-visual edge" aria-hidden="true"><svg viewBox="0 0 400 150" preserveAspectRatio="none"><path d="M0 125 58 88 97 109 143 28 188 91 224 47 274 76 325 19 400 70"/><path d="M0 140 76 116 127 132 175 89 224 112 285 86 343 105 400 82"/></svg></div>
+                <div class="card-body"><p>Spatial filtering</p><h3>Image Enhancement</h3><p>Compare blur, sharpening, thresholding, and edge detection using adjustable controls.</p><div><span>Filter · Tune · Compare</span><button class="open-lab" type="button" data-lab="02" data-title="Image Enhancement">Open lab</button></div></div>
+              </article>
+
+              <article class="lab-card" data-status="planned" data-search="feature extraction keypoints descriptors sift orb">
+                <div class="card-head"><span>LAB ACTIVITY 03</span><b class="status planned">Planned</b></div>
+                <div class="card-visual keypoints" aria-hidden="true"><i style="--x:18%;--y:25%"></i><i style="--x:32%;--y:62%"></i><i style="--x:45%;--y:35%"></i><i style="--x:58%;--y:72%"></i><i style="--x:75%;--y:26%"></i><i style="--x:83%;--y:61%"></i><i style="--x:64%;--y:42%"></i><i style="--x:25%;--y:79%"></i></div>
+                <div class="card-body"><p>Feature engineering</p><h3>Feature Extraction</h3><p>Locate keypoints and visualize descriptors across source and transformed images.</p><div><span>Detect · Match · Measure</span><button class="open-lab" type="button" data-lab="03" data-title="Feature Extraction">Preview</button></div></div>
+              </article>
+
+              <article class="lab-card" data-status="planned" data-search="object detection bounding box confidence video">
+                <div class="card-head"><span>LAB ACTIVITY 04</span><b class="status planned">Planned</b></div>
+                <div class="card-visual boxes" aria-hidden="true"><i></i><i></i><span>OBJECT 92%</span></div>
+                <div class="card-body"><p>Visual recognition</p><h3>Object Detection</h3><p>Detect objects in images or video and review labels, boxes, and confidence scores.</p><div><span>Detect · Label · Track</span><button class="open-lab" type="button" data-lab="04" data-title="Object Detection">Preview</button></div></div>
+              </article>
+
+              <article class="lab-card" data-status="planned" data-search="segmentation masks regions pixels classes">
+                <div class="card-head"><span>LAB ACTIVITY 05</span><b class="status planned">Planned</b></div>
+                <div class="card-visual segments" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+                <div class="card-body"><p>Pixel classification</p><h3>Image Segmentation</h3><p>Separate images into meaningful regions and compare class masks side by side.</p><div><span>Segment · Mask · Inspect</span><button class="open-lab" type="button" data-lab="05" data-title="Image Segmentation">Preview</button></div></div>
+              </article>
+
+              <article class="lab-card" data-status="planned" data-search="neural network deep learning classifier prediction">
+                <div class="card-head"><span>LAB ACTIVITY 06</span><b class="status planned">Planned</b></div>
+                <div class="card-visual network" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+                <div class="card-body"><p>Deep learning</p><h3>Neural Networks</h3><p>Run a trained classifier and inspect predictions, probability, and model behavior.</p><div><span>Classify · Predict · Evaluate</span><button class="open-lab" type="button" data-lab="06" data-title="Neural Networks">Preview</button></div></div>
+              </article>
+            </div>
+          </section>
+
+          <section class="workspace-view" id="workspace-view" hidden>
+            <div class="workspace-header">
+              <button class="back-button" id="back-button" type="button"><span>←</span> Back to activities</button>
+              <div><p id="workspace-number">LAB ACTIVITY 01</p><h1 id="workspace-title">Image Fundamentals</h1></div>
+              <div class="workspace-status"><i></i><span>Interface ready</span></div>
+            </div>
+
+            <div class="lab-workspace">
+              <aside class="control-panel">
+                <div class="panel-title"><span>INPUT & CONTROLS</span><b>01</b></div>
+                <div class="control-block">
+                  <label>Source image</label>
+                  <label class="drop-zone" id="drop-zone" for="file-input">
+                    <input id="file-input" type="file" accept="image/*" />
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V4M7 9l5-5 5 5M5 13v6h14v-6" /></svg>
+                    <strong>Drop image here</strong><small>PNG, JPG, or WEBP</small>
+                  </label>
+                </div>
+                <div class="control-block">
+                  <label for="technique">Technique</label>
+                  <select id="technique"><option>RGB channel inspection</option><option>Grayscale conversion</option><option>Histogram analysis</option><option>Edge preview</option></select>
+                </div>
+                <div class="control-block range-block">
+                  <div><label for="intensity">Intensity</label><output id="intensity-output">72%</output></div>
+                  <input id="intensity" type="range" min="0" max="100" value="72" />
+                </div>
+                <button class="run-button" id="run-button" type="button" disabled>Run analysis</button>
+                <p class="helper-text">UI preview only. The Computer Vision algorithm will be connected when the lab implementation is added.</p>
+              </aside>
+
+              <div class="output-panel">
+                <div class="panel-title"><span>VISUAL OUTPUT</span><div><i></i><b id="output-state">Waiting for input</b></div></div>
+                <div class="output-stage" id="output-stage">
+                  <div class="empty-output" id="empty-output"><span class="reticle"></span><strong>No input selected</strong><p>Upload an image from the control panel to begin.</p></div>
+                  <img id="preview-image" alt="Uploaded source preview" />
+                  <div class="processing" id="processing"><i></i><span>PROCESSING VISUAL DATA</span></div>
+                </div>
+                <div class="output-metrics">
+                  <div><small>WIDTH</small><strong id="metric-width">—</strong></div>
+                  <div><small>HEIGHT</small><strong id="metric-height">—</strong></div>
+                  <div><small>FORMAT</small><strong id="metric-format">—</strong></div>
+                  <div><small>STATUS</small><strong id="metric-status">Idle</strong></div>
+                </div>
+              </div>
+            </div>
+          </section>
+        </main>
+      </div>
+    </div>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  </body>
+</html>

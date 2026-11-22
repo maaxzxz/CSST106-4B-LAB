@@ -1076,9 +1076,12 @@ function attachCropSelector(result) {
   const wrap = canvas.parentElement;
   card.classList.add('crop-source-card');
   wrap.classList.add('crop-selector-active');
-  canvas.dataset.disableLightbox = 'true';
-  canvas.removeAttribute('role');
-  canvas.removeAttribute('tabindex');
+  wrap.dataset.disableLightbox = 'true';
+  wrap.removeAttribute('role');
+  wrap.removeAttribute('tabindex');
+  wrap.removeAttribute('title');
+  wrap.removeAttribute('aria-label');
+  card.querySelector('.result-expand')?.setAttribute('hidden', '');
   canvas.setAttribute('aria-label', 'Drag over the source image to select a crop area');
   canvas.setAttribute('title', 'Drag to select crop area');
   canvas.style.cursor = 'crosshair';
@@ -1191,26 +1194,27 @@ function createResultCard(title, subtitle, width, height) {
   card.className = 'result-card';
   const header = document.createElement('div');
   header.className = 'result-card-header';
-  header.innerHTML = `<div><strong>${title}</strong><span>${subtitle}</span></div><b>${resultGrid.children.length + 1}</b>`;
+  header.innerHTML = `<div><strong>${title}</strong><span>${subtitle}</span></div><button class="result-expand" type="button" aria-label="Enlarge ${title}" title="Enlarge image"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M9 4H4v5M15 4h5v5M20 15v5h-5M4 15v5h5"/></svg></button>`;
   const canvasWrap = document.createElement('div');
   canvasWrap.className = 'result-canvas-wrap';
+  canvasWrap.tabIndex = 0;
+  canvasWrap.setAttribute('role', 'button');
+  canvasWrap.setAttribute('aria-label', `Enlarge ${title}`);
+  canvasWrap.setAttribute('title', 'Click anywhere on this image to enlarge it');
   const canvas = document.createElement('canvas');
   canvas.width = width;
   canvas.height = height;
-  canvas.tabIndex = 0;
-  canvas.setAttribute('role', 'button');
-  canvas.setAttribute('aria-label', `Enlarge ${title}`);
-  canvas.setAttribute('title', 'Click to enlarge');
   const openCanvas = () => {
-    if (canvas.dataset.disableLightbox === 'true') return;
+    if (canvasWrap.dataset.disableLightbox === 'true') return;
     openImageLightbox(canvas, title, subtitle);
   };
-  canvas.addEventListener('click', openCanvas);
-  canvas.addEventListener('keydown', (event) => {
+  canvasWrap.addEventListener('click', openCanvas);
+  canvasWrap.addEventListener('keydown', (event) => {
     if (event.key !== 'Enter' && event.key !== ' ') return;
     event.preventDefault();
     openCanvas();
   });
+  header.querySelector('.result-expand').addEventListener('click', openCanvas);
   canvasWrap.appendChild(canvas);
   card.append(header, canvasWrap);
   resultGrid.appendChild(card);

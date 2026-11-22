@@ -390,7 +390,7 @@ function loadImage(file) {
   reader.onload = (event) => {
     const image = new Image();
     image.onload = () => {
-      const maxDimension = 1000;
+      const maxDimension = currentLab === '01' ? 4096 : 1000;
       const scale = Math.min(1, maxDimension / Math.max(image.naturalWidth, image.naturalHeight));
       const width = Math.max(1, Math.round(image.naturalWidth * scale));
       const height = Math.max(1, Math.round(image.naturalHeight * scale));

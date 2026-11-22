@@ -42,9 +42,10 @@ const labDefinitions = {
       ['green', 'Isolate green channel'],
       ['blue', 'Isolate blue channel'],
       ['pixel', 'Modify one pixel'],
-      ['crop', 'Crop center region'],
+      ['crop', 'Crop a region of interest'],
       ['resize', 'Resize image'],
-      ['rotate', 'Rotate 90° clockwise']
+      ['rotate-left', 'Rotate 90° counter-clockwise'],
+      ['rotate-right', 'Rotate 90° clockwise']
     ],
     procedure: [
       'Upload a color or grayscale image and record its width, height, and channels.',
@@ -291,17 +292,22 @@ technique.addEventListener('change', renderDynamicControls);
 function renderDynamicControls() {
   const value = technique.value;
   if (currentLab === '01') {
+    const transformTools = labOneTransformTools(value);
+    let operationControls;
     if (value === 'pixel') {
       const maxX = Math.max(0, (sourceCanvas?.width || 1) - 1);
       const maxY = Math.max(0, (sourceCanvas?.height || 1) - 1);
-      dynamicControls.innerHTML = `<div class="control-block compact-controls"><label>Pixel coordinate & color</label><div class="field-row"><label>X<input id="pixel-x" type="number" min="0" max="${maxX}" value="${Math.floor(maxX / 2)}"></label><label>Y<input id="pixel-y" type="number" min="0" max="${maxY}" value="${Math.floor(maxY / 2)}"></label><label>Color<input id="pixel-color" type="color" value="#ff4f8b"></label></div></div>`;
-    } else if (value === 'crop' || value === 'resize') {
-      const label = value === 'crop' ? 'Center region size' : 'Output scale';
-      dynamicControls.innerHTML = rangeControl('operation-value', label, 25, 100, value === 'crop' ? 60 : 50, 5, '%');
-      bindRangeOutputs();
+      operationControls = `<div class="control-block compact-controls"><label>Pixel coordinate & color</label><div class="field-row"><label>X<input id="pixel-x" type="number" min="0" max="${maxX}" value="${Math.floor(maxX / 2)}"></label><label>Y<input id="pixel-y" type="number" min="0" max="${maxY}" value="${Math.floor(maxY / 2)}"></label><label>Color<input id="pixel-color" type="color" value="#ff4f8b"></label></div></div>`;
+    } else if (value === 'crop') {
+      operationControls = rangeControl('crop-width', 'Crop width', 20, 100, 70, 5, '%') + rangeControl('crop-height', 'Crop height', 20, 100, 70, 5, '%') + `<div class="control-block"><label for="crop-position">Crop position</label><select id="crop-position"><option value="center">Center</option><option value="top-left">Top left</option><option value="top-right">Top right</option><option value="bottom-left">Bottom left</option><option value="bottom-right">Bottom right</option></select></div>`;
+    } else if (value === 'resize') {
+      operationControls = rangeControl('operation-value', 'Output scale', 25, 100, 50, 5, '%');
     } else {
-      dynamicControls.innerHTML = `<div class="control-hint"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01" /></svg><span>The result will be compared with the original image.</span></div>`;
+      operationControls = `<div class="control-hint"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01" /></svg><span>The result will be compared with the original image.</span></div>`;
     }
+    dynamicControls.innerHTML = transformTools + operationControls;
+    bindRangeOutputs();
+    bindTransformTools();
   } else if (currentLab === '02') {
     dynamicControls.innerHTML = rangeControl('low-threshold', 'Canny low threshold', 0, 200, 50, 5, '') + rangeControl('high-threshold', 'Canny high threshold', 50, 255, 150, 5, '');
     bindRangeOutputs();
@@ -309,6 +315,20 @@ function renderDynamicControls() {
     dynamicControls.innerHTML = rangeControl('clip-limit', 'CLAHE clip limit', 1, 5, 2, .5, '×') + `<div class="control-block"><label for="tile-grid">Adaptive tile grid</label><select id="tile-grid"><option value="4">4 × 4</option><option value="8" selected>8 × 8</option><option value="12">12 × 12</option></select></div>`;
     bindRangeOutputs();
   }
+}
+
+function labOneTransformTools(activeOperation) {
+  const active = (operation) => activeOperation === operation ? ' is-active' : '';
+  return `<div class="control-block transform-tools"><label>Quick transform tools</label><div><button class="${active('crop')}" type="button" data-transform="crop"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3v14a2 2 0 0 0 2 2h12M3 7h14a2 2 0 0 1 2 2v12"/></svg><span>Crop</span></button><button class="${active('rotate-left')}" type="button" data-transform="rotate-left"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="5" width="12" height="14" rx="2" transform="rotate(-12 12 12)"/></svg><span>Left 90°</span></button><button class="${active('rotate-right')}" type="button" data-transform="rotate-right"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="6" y="5" width="12" height="14" rx="2" transform="rotate(12 12 12)"/></svg><span>Right 90°</span></button></div></div>`;
+}
+
+function bindTransformTools() {
+  dynamicControls.querySelectorAll('[data-transform]').forEach((button) => {
+    button.addEventListener('click', () => {
+      technique.value = button.dataset.transform;
+      renderDynamicControls();
+    });
+  });
 }
 
 function rangeControl(id, label, min, max, value, step, suffix) {
@@ -446,12 +466,19 @@ function runLabOne() {
     }
     activeResultCanvas = renderImageDataResult('Modified pixel region', `Coordinate (${x}, ${y}) · RGB(${red}, ${green}, ${blue})`, output, sourceCanvas.width, sourceCanvas.height).canvas;
   } else if (operation === 'crop') {
-    const amount = Number(document.querySelector('#operation-value').value) / 100;
-    const width = Math.max(1, Math.round(sourceCanvas.width * amount));
-    const height = Math.max(1, Math.round(sourceCanvas.height * amount));
-    const sx = Math.round((sourceCanvas.width - width) / 2);
-    const sy = Math.round((sourceCanvas.height - height) / 2);
-    const result = createResultCard('Center crop', `${Math.round(amount * 100)}% ROI · ${width} × ${height}`, width, height);
+    const widthAmount = Number(document.querySelector('#crop-width').value) / 100;
+    const heightAmount = Number(document.querySelector('#crop-height').value) / 100;
+    const position = document.querySelector('#crop-position').value;
+    const width = Math.max(1, Math.round(sourceCanvas.width * widthAmount));
+    const height = Math.max(1, Math.round(sourceCanvas.height * heightAmount));
+    let sx = Math.round((sourceCanvas.width - width) / 2);
+    let sy = Math.round((sourceCanvas.height - height) / 2);
+    if (position.includes('left')) sx = 0;
+    if (position.includes('right')) sx = sourceCanvas.width - width;
+    if (position.includes('top')) sy = 0;
+    if (position.includes('bottom')) sy = sourceCanvas.height - height;
+    const positionLabel = position.split('-').map(capitalize).join(' ');
+    const result = createResultCard(`${positionLabel} crop`, `${Math.round(widthAmount * 100)}% × ${Math.round(heightAmount * 100)}% ROI · ${width} × ${height}`, width, height);
     result.context.drawImage(sourceCanvas, sx, sy, width, height, 0, 0, width, height);
     activeResultCanvas = result.canvas;
   } else if (operation === 'resize') {
@@ -462,10 +489,12 @@ function runLabOne() {
     result.context.imageSmoothingQuality = 'high';
     result.context.drawImage(sourceCanvas, 0, 0, width, height);
     activeResultCanvas = result.canvas;
-  } else if (operation === 'rotate') {
-    const result = createResultCard('Rotated image', '90° clockwise', sourceCanvas.height, sourceCanvas.width);
-    result.context.translate(sourceCanvas.height, 0);
-    result.context.rotate(Math.PI / 2);
+  } else if (operation === 'rotate-left' || operation === 'rotate-right') {
+    const clockwise = operation === 'rotate-right';
+    const result = createResultCard('Rotated image', clockwise ? '90° clockwise' : '90° counter-clockwise', sourceCanvas.height, sourceCanvas.width);
+    if (clockwise) result.context.translate(sourceCanvas.height, 0);
+    else result.context.translate(0, sourceCanvas.width);
+    result.context.rotate(clockwise ? Math.PI / 2 : -Math.PI / 2);
     result.context.drawImage(sourceCanvas, 0, 0);
     activeResultCanvas = result.canvas;
   }

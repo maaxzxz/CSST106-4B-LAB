@@ -89,16 +89,15 @@ cv2.destroyAllWindows()`
     objective: 'Apply Gaussian preprocessing, Sobel gradients, and Canny detection, then compare the resulting edge maps.',
     selectLabel: 'Output comparison',
     options: [
-      ['compare', 'Compare Sobel and Canny'],
-      ['sobel', 'Sobel magnitude only'],
-      ['canny', 'Canny edges only']
+      ['compare', 'Original + Sobel + Canny']
     ],
     procedure: [
-      'Upload an image and convert it to grayscale.',
+      'Upload the provided input.jpg image and convert it to grayscale.',
       'Apply a 3×3 Gaussian blur to reduce image noise.',
       'Calculate horizontal and vertical Sobel gradients and combine their magnitudes.',
       'Apply Canny non-maximum suppression, double thresholds, and edge tracking.',
-      'Display the original grayscale image, Sobel result, and Canny result side by side.'
+      'Display the original image, Sobel edges, and Canny edges side by side.',
+      'Explain the differences between the edge maps produced by each method.'
     ],
     findings: [
       ['How does Sobel appear?', 'Sobel produces a grayscale gradient map. Strong transitions are bright, edges can be thick, and the output retains edge-strength information.'],
@@ -235,6 +234,7 @@ function openLab(number) {
   document.querySelector('#lab-week').textContent = definition.week;
   document.querySelector('#control-lab-number').textContent = number;
   document.querySelector('#technique-label').textContent = definition.selectLabel;
+  document.querySelector('#drop-zone small').textContent = number === '02' ? 'Use input.jpg · PNG, JPG, or WEBP' : 'PNG, JPG, or WEBP';
 
   technique.innerHTML = definition.options.map(([value, label]) => `<option value="${value}">${label}</option>`).join('');
   renderDynamicControls();
@@ -529,13 +529,26 @@ function runLabTwo() {
 
   clearResults();
   renderGrayResult('Original grayscale', 'Input after luminance conversion', grayscale, width, height);
-  if (technique.value !== 'canny') {
-    activeResultCanvas = renderGrayResult('Sobel edges', 'Combined X and Y gradient magnitude', sobelData.display, width, height).canvas;
-  }
-  if (technique.value !== 'sobel') {
-    activeResultCanvas = renderGrayResult('Canny edges', `Thresholds ${Math.min(low, high - 1)} / ${Math.max(high, low + 1)}`, cannyData, width, height).canvas;
-  }
+  renderGrayResult('Sobel edges', 'Combined X and Y gradient magnitude', sobelData.display, width, height);
+  activeResultCanvas = renderGrayResult('Canny edges', `Thresholds ${Math.min(low, high - 1)} / ${Math.max(high, low + 1)}`, cannyData, width, height).canvas;
+  renderEdgeExplanation(sobelData.display, cannyData, width, height, low, high);
   revealResults();
+}
+
+function renderEdgeExplanation(sobelDisplay, cannyData, width, height, low, high) {
+  const totalPixels = width * height;
+  let sobelEdgePixels = 0;
+  let cannyEdgePixels = 0;
+  for (let index = 0; index < totalPixels; index++) {
+    if (sobelDisplay[index] >= 64) sobelEdgePixels++;
+    if (cannyData[index] === 255) cannyEdgePixels++;
+  }
+  const sobelPercent = (sobelEdgePixels / totalPixels * 100).toFixed(1);
+  const cannyPercent = (cannyEdgePixels / totalPixels * 100).toFixed(1);
+  const note = document.createElement('article');
+  note.className = 'edge-explanation';
+  note.innerHTML = `<div class="edge-explanation-heading"><span>EDGE MAP COMPARISON</span><strong>${sourceFile?.name || 'input.jpg'}</strong></div><div class="edge-methods"><section><div class="method-icon sobel-icon"><i></i><i></i><i></i></div><h3>Sobel edge map</h3><p>Sobel calculates first-order intensity gradients in the X and Y directions. Its grayscale output preserves edge strength, so strong transitions appear brighter while weaker transitions remain visible. Edges are usually thicker and more sensitive to image noise.</p><b>${sobelEdgePixels.toLocaleString()} strong-gradient pixels · ${sobelPercent}%</b></section><section><div class="method-icon canny-icon"><i></i></div><h3>Canny edge map</h3><p>Canny combines Gaussian smoothing, gradient analysis, non-maximum suppression, and hysteresis thresholds (${Math.min(low, high - 1)} / ${Math.max(high, low + 1)}). It produces a cleaner binary map with thinner, more connected edges and suppresses many weak or noisy responses.</p><b>${cannyEdgePixels.toLocaleString()} final edge pixels · ${cannyPercent}%</b></section></div><p class="edge-conclusion"><strong>Conclusion:</strong> Sobel is useful when gradient magnitude and edge strength must be inspected. Canny is preferable when the task needs a clean, localized, binary outline for later detection, segmentation, or feature extraction.</p>`;
+  resultGrid.appendChild(note);
 }
 
 function runLabThree() {

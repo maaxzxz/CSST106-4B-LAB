@@ -44,8 +44,8 @@
 
           <p>Lab activities</p>
           <button class="nav-item lab-nav" type="button" data-lab="01" data-title="Image Fundamentals"><b>01</b> Image Fundamentals <i class="ready-dot"></i></button>
-          <button class="nav-item lab-nav" type="button" data-lab="02" data-title="Image Enhancement"><b>02</b> Image Enhancement <i class="ready-dot"></i></button>
-          <button class="nav-item lab-nav" type="button" data-lab="03" data-title="Feature Extraction"><b>03</b> Feature Extraction</button>
+          <button class="nav-item lab-nav" type="button" data-lab="02" data-title="Edge Detection"><b>02</b> Edge Detection <i class="ready-dot"></i></button>
+          <button class="nav-item lab-nav" type="button" data-lab="03" data-title="Histogram Equalization"><b>03</b> Histogram Equalization <i class="ready-dot"></i></button>
           <button class="nav-item lab-nav" type="button" data-lab="04" data-title="Object Detection"><b>04</b> Object Detection</button>
           <button class="nav-item lab-nav" type="button" data-lab="05" data-title="Image Segmentation"><b>05</b> Image Segmentation</button>
           <button class="nav-item lab-nav" type="button" data-lab="06" data-title="Neural Networks"><b>06</b> Neural Networks</button>
@@ -107,9 +107,9 @@
                 <div class="sim-footer"><span>OBJECTS <b>03</b></span><span>CONFIDENCE <b>98.2%</b></span><span>FPS <b>60</b></span></div>
               </div>
               <div class="banner-stats">
-                <div><strong>02</strong><span>Interfaces ready</span></div>
+                <div><strong>03</strong><span>Interfaces ready</span></div>
                 <div><strong>06</strong><span>Activities registered</span></div>
-                <div><strong>33%</strong><span>UI completion</span></div>
+                <div><strong>50%</strong><span>UI completion</span></div>
               </div>
             </div>
 
@@ -129,16 +129,16 @@
                 <div class="card-body"><p>Image processing</p><h3>Image Fundamentals</h3><p>Inspect image properties, RGB channels, grayscale conversion, and intensity histograms.</p><div><span>Upload · Inspect · Compare</span><button class="open-lab" type="button" data-lab="01" data-title="Image Fundamentals">Open lab</button></div></div>
               </article>
 
-              <article class="lab-card" data-status="ready" data-search="image enhancement filters blur sharpen edge detection">
+              <article class="lab-card" data-status="ready" data-search="edge detection sobel canny gaussian blur threshold">
                 <div class="card-head"><span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 18V9M10 18V4M16 18v-6M22 18V7"/></svg>LAB ACTIVITY 02</span><b class="status ready">Ready</b></div>
                 <div class="card-visual edge" aria-hidden="true"><svg viewBox="0 0 400 150" preserveAspectRatio="none"><path d="M0 125 58 88 97 109 143 28 188 91 224 47 274 76 325 19 400 70"/><path d="M0 140 76 116 127 132 175 89 224 112 285 86 343 105 400 82"/></svg></div>
-                <div class="card-body"><p>Spatial filtering</p><h3>Image Enhancement</h3><p>Compare blur, sharpening, thresholding, and edge detection using adjustable controls.</p><div><span>Filter · Tune · Compare</span><button class="open-lab" type="button" data-lab="02" data-title="Image Enhancement">Open lab</button></div></div>
+                <div class="card-body"><p>Spatial filtering</p><h3>Edge Detection</h3><p>Apply Gaussian preprocessing, then compare Sobel gradients and Canny edge maps side by side.</p><div><span>Blur · Detect · Compare</span><button class="open-lab" type="button" data-lab="02" data-title="Edge Detection">Open lab</button></div></div>
               </article>
 
-              <article class="lab-card" data-status="planned" data-search="feature extraction keypoints descriptors sift orb">
-                <div class="card-head"><span><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="6" cy="7" r="2"/><circle cx="18" cy="6" r="2"/><circle cx="12" cy="17" r="2"/><path d="m8 8 3 7M16 7l-3 8M8 7h8"/></svg>LAB ACTIVITY 03</span><b class="status planned">Planned</b></div>
-                <div class="card-visual keypoints" aria-hidden="true"><i style="--x:18%;--y:25%"></i><i style="--x:32%;--y:62%"></i><i style="--x:45%;--y:35%"></i><i style="--x:58%;--y:72%"></i><i style="--x:75%;--y:26%"></i><i style="--x:83%;--y:61%"></i><i style="--x:64%;--y:42%"></i><i style="--x:25%;--y:79%"></i></div>
-                <div class="card-body"><p>Feature engineering</p><h3>Feature Extraction</h3><p>Locate keypoints and visualize descriptors across source and transformed images.</p><div><span>Detect · Match · Measure</span><button class="open-lab" type="button" data-lab="03" data-title="Feature Extraction">Preview</button></div></div>
+              <article class="lab-card" data-status="ready" data-search="histogram equalization contrast clahe adaptive grayscale">
+                <div class="card-head"><span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 19V9M8 19V5M12 19v-7M16 19V3M20 19v-5"/></svg>LAB ACTIVITY 03</span><b class="status ready">Ready</b></div>
+                <div class="card-visual histogram histogram-wide" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+                <div class="card-body"><p>Contrast enhancement</p><h3>Histogram Equalization</h3><p>Compare original contrast, global equalization, contrast stretching, and adaptive CLAHE.</p><div><span>Measure · Equalize · Analyze</span><button class="open-lab" type="button" data-lab="03" data-title="Histogram Equalization">Open lab</button></div></div>
               </article>
 
               <article class="lab-card" data-status="planned" data-search="object detection bounding box confidence video">
@@ -163,14 +163,19 @@
 
           <section class="workspace-view" id="workspace-view" hidden>
             <div class="workspace-header">
-              <button class="back-button" id="back-button" type="button"><span>←</span> Back to activities</button>
+              <button class="back-button" id="back-button" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z" /></svg> All activities</button>
               <div><p id="workspace-number">LAB ACTIVITY 01</p><h1 id="workspace-title">Image Fundamentals</h1></div>
-              <div class="workspace-status"><i></i><span>Interface ready</span></div>
+              <div class="workspace-status"><i></i><span>Functional module</span></div>
+            </div>
+
+            <div class="workspace-intro">
+              <div><span id="lab-topic">IMAGE MANIPULATION</span><p id="workspace-objective">Explore how digital images are represented and manipulated.</p></div>
+              <div class="lab-meta"><span>CSST 106</span><span id="lab-week">WEEK 1–2</span><span>2026–2027</span></div>
             </div>
 
             <div class="lab-workspace">
               <aside class="control-panel">
-                <div class="panel-title"><span>INPUT & CONTROLS</span><b>01</b></div>
+                <div class="panel-title"><span>INPUT & CONTROLS</span><b id="control-lab-number">01</b></div>
                 <div class="control-block">
                   <label>Source image</label>
                   <label class="drop-zone" id="drop-zone" for="file-input">
@@ -180,32 +185,38 @@
                   </label>
                 </div>
                 <div class="control-block">
-                  <label for="technique">Technique</label>
-                  <select id="technique"><option>RGB channel inspection</option><option>Grayscale conversion</option><option>Histogram analysis</option><option>Edge preview</option></select>
+                  <label for="technique" id="technique-label">Operation</label>
+                  <select id="technique"></select>
                 </div>
-                <div class="control-block range-block">
-                  <div><label for="intensity">Intensity</label><output id="intensity-output">72%</output></div>
-                  <input id="intensity" type="range" min="0" max="100" value="72" />
-                </div>
-                <button class="run-button" id="run-button" type="button" disabled>Run analysis</button>
-                <p class="helper-text">UI preview only. The Computer Vision algorithm will be connected when the lab implementation is added.</p>
+                <div id="dynamic-controls"></div>
+                <button class="run-button" id="run-button" type="button" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 7 8 5-8 5V7Z" /></svg>Run experiment</button>
+                <p class="helper-text">Processing runs locally in your browser. Uploaded images are not sent anywhere.</p>
               </aside>
 
               <div class="output-panel">
-                <div class="panel-title"><span>VISUAL OUTPUT</span><div><i></i><b id="output-state">Waiting for input</b></div></div>
+                <div class="panel-title"><span>EXPERIMENT OUTPUT</span><div class="output-actions"><button id="download-result" type="button" disabled><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v11M8 11l4 4 4-4M5 20h14" /></svg>Save result</button><i></i><b id="output-state">Waiting for input</b></div></div>
                 <div class="output-stage" id="output-stage">
                   <div class="empty-output" id="empty-output"><span class="reticle"></span><strong>No input selected</strong><p>Upload an image from the control panel to begin.</p></div>
-                  <img id="preview-image" alt="Uploaded source preview" />
+                  <div class="result-grid" id="result-grid" hidden></div>
                   <div class="processing" id="processing"><i></i><span>PROCESSING VISUAL DATA</span></div>
                 </div>
                 <div class="output-metrics">
                   <div><small>WIDTH</small><strong id="metric-width">—</strong></div>
                   <div><small>HEIGHT</small><strong id="metric-height">—</strong></div>
-                  <div><small>FORMAT</small><strong id="metric-format">—</strong></div>
+                  <div><small>CHANNELS</small><strong id="metric-channels">—</strong></div>
                   <div><small>STATUS</small><strong id="metric-status">Idle</strong></div>
                 </div>
               </div>
             </div>
+
+            <section class="lab-guide" aria-labelledby="guide-title">
+              <div class="guide-heading"><div><p>LABORATORY GUIDE</p><h2 id="guide-title">Requirements & findings</h2></div><span id="guide-progress">Ready to experiment</span></div>
+              <div class="guide-grid">
+                <article><div class="guide-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 3h12v18H6zM9 7h6M9 11h6M9 15h4" /></svg></div><h3>Required procedure</h3><div id="procedure-content"></div></article>
+                <article><div class="guide-icon"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.7.3-1 1-1 1.7M12 17h.01" /></svg></div><h3>Observations & answers</h3><div id="findings-content"></div></article>
+              </div>
+              <details class="code-reference"><summary><span><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m8 9-3 3 3 3M16 9l3 3-3 3M14 5l-4 14" /></svg>Python / OpenCV reference</span><b>View code</b></summary><pre><code id="python-code"></code></pre></details>
+            </section>
           </section>
         </main>
       </div>

@@ -8,9 +8,13 @@ A responsive laboratory dashboard for organizing and running all Computer Vision
 - Animated, code-native computer-vision telemetry display and interface icons
 - Dedicated dashboard and full laboratory experiment workspace
 - Laboratory archive with ready/planned filters
-- Reusable module preview with image upload, drag-and-drop, technique selection, and simulated processing state
+- Functional browser-side image processing with drag-and-drop input and downloadable PNG results
 - Accessible navigation, keyboard-friendly dialog, reduced-motion support, and mobile layouts
-- Six starter activity modules ready to connect to the real Computer Vision implementations
+- Completed Lab 01 image manipulation: grayscale/channels, pixel editing, crop, resize, and rotation
+- Completed Lab 02 edge detection: Gaussian blur, Sobel magnitude, and Canny edge tracking
+- Completed Lab 03 contrast enhancement: histograms, global equalization, stretching, and CLAHE
+- Embedded procedures, observations, answers, and Python/OpenCV reference code from the laboratory specifications
+- Three additional activity slots ready for future Computer Vision modules
 
 ## Run locally
 

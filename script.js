@@ -20,6 +20,9 @@ const downloadButton = document.querySelector('#download-result');
 const toast = document.querySelector('#toast');
 const themeToggle = document.querySelector('#theme-toggle');
 const themeColor = document.querySelector('meta[name="theme-color"]');
+const imageLightbox = document.querySelector('#image-lightbox');
+const lightboxCanvas = document.querySelector('#lightbox-canvas');
+const lightboxClose = document.querySelector('#lightbox-close');
 
 let activeFilter = 'all';
 let currentLab = '01';
@@ -30,6 +33,7 @@ let activeResultCanvas = null;
 let cropSelection = null;
 let pcaDataset = [];
 let toastTimer;
+let lightboxReturnFocus = null;
 
 const labDefinitions = {
   '01': {
@@ -1072,6 +1076,11 @@ function attachCropSelector(result) {
   const wrap = canvas.parentElement;
   card.classList.add('crop-source-card');
   wrap.classList.add('crop-selector-active');
+  canvas.dataset.disableLightbox = 'true';
+  canvas.removeAttribute('role');
+  canvas.removeAttribute('tabindex');
+  canvas.setAttribute('aria-label', 'Drag over the source image to select a crop area');
+  canvas.setAttribute('title', 'Drag to select crop area');
   canvas.style.cursor = 'crosshair';
   canvas.style.touchAction = 'none';
 
@@ -1188,7 +1197,20 @@ function createResultCard(title, subtitle, width, height) {
   const canvas = document.createElement('canvas');
   canvas.width = width;
   canvas.height = height;
-  canvas.setAttribute('aria-label', title);
+  canvas.tabIndex = 0;
+  canvas.setAttribute('role', 'button');
+  canvas.setAttribute('aria-label', `Enlarge ${title}`);
+  canvas.setAttribute('title', 'Click to enlarge');
+  const openCanvas = () => {
+    if (canvas.dataset.disableLightbox === 'true') return;
+    openImageLightbox(canvas, title, subtitle);
+  };
+  canvas.addEventListener('click', openCanvas);
+  canvas.addEventListener('keydown', (event) => {
+    if (event.key !== 'Enter' && event.key !== ' ') return;
+    event.preventDefault();
+    openCanvas();
+  });
   canvasWrap.appendChild(canvas);
   card.append(header, canvasWrap);
   resultGrid.appendChild(card);
@@ -1426,6 +1448,41 @@ function drawHistogram(canvas, grayscale) {
     context.fillRect(index * barWidth, canvas.height - height, Math.max(1, barWidth), height);
   }
 }
+
+function openImageLightbox(source, title, subtitle) {
+  lightboxReturnFocus = document.activeElement;
+  lightboxCanvas.width = source.width;
+  lightboxCanvas.height = source.height;
+  const context = lightboxCanvas.getContext('2d');
+  context.clearRect(0, 0, source.width, source.height);
+  context.drawImage(source, 0, 0);
+  document.querySelector('#lightbox-title').textContent = title;
+  document.querySelector('#lightbox-subtitle').textContent = `${subtitle} · ${source.width} × ${source.height}px`;
+  imageLightbox.hidden = false;
+  document.body.classList.add('lightbox-open');
+  requestAnimationFrame(() => {
+    imageLightbox.classList.add('is-open');
+    lightboxClose.focus();
+  });
+}
+
+function closeImageLightbox() {
+  if (imageLightbox.hidden) return;
+  imageLightbox.classList.remove('is-open');
+  document.body.classList.remove('lightbox-open');
+  window.setTimeout(() => {
+    imageLightbox.hidden = true;
+    if (lightboxReturnFocus instanceof HTMLElement) lightboxReturnFocus.focus();
+  }, 180);
+}
+
+lightboxClose.addEventListener('click', closeImageLightbox);
+imageLightbox.addEventListener('click', (event) => {
+  if (event.target === imageLightbox) closeImageLightbox();
+});
+document.addEventListener('keydown', (event) => {
+  if (event.key === 'Escape' && !imageLightbox.hidden) closeImageLightbox();
+});
 
 downloadButton.addEventListener('click', () => {
   if (!activeResultCanvas) return;

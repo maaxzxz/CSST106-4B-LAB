@@ -186,129 +186,57 @@ plt.show()`
     title: 'SURF Feature Detection', topic: 'HESSIAN KEYPOINTS & DESCRIPTORS', week: 'WEEK 6',
     objective: 'Detect scale-aware interest points, study Hessian threshold sensitivity, and connect browser results to OpenCV SURF descriptors.',
     selectLabel: 'Feature experiment', options: [['surf', 'SURF-style Hessian keypoints']],
-    procedure: ['Upload an object or scene image and convert it to grayscale.', 'Calculate multi-scale Hessian determinant responses and retain local maxima.', 'Change the Hessian threshold and observe how the keypoint count changes.', 'Inspect keypoint position, scale, and orientation overlays.', 'Use the Python reference to compute exact SURF descriptors and match two images.'],
+    procedure: ['Upload an object or scene image to preview Hessian keypoints.', 'Change the Hessian threshold and observe how the keypoint count changes.', 'Run the Python script on two views of the same scene to compare SURF, upright SURF, SIFT, and ORB matches.'],
     findings: [
       ['What does the Hessian threshold change?', 'A higher threshold accepts only stronger blob responses, so fewer keypoints remain. A lower value detects more points but may include unstable features.'],
       ['Why are descriptors important?', 'They encode the neighborhood around each keypoint so corresponding features can be matched across scale, rotation, viewpoint, or lighting changes.'],
       ['How do SURF, SIFT, and ORB differ?', 'SURF uses Hessian blob responses and is typically faster than SIFT; SIFT is highly distinctive; ORB is fast, binary, and license-friendly.']
     ],
-    code: String.raw`import cv2
-
-img1 = cv2.imread('image1.jpg', cv2.IMREAD_GRAYSCALE)
-img2 = cv2.imread('image2.jpg', cv2.IMREAD_GRAYSCALE)
-surf = cv2.xfeatures2d.SURF_create(hessianThreshold=400, upright=False)
-kp1, des1 = surf.detectAndCompute(img1, None)
-kp2, des2 = surf.detectAndCompute(img2, None)
-
-matcher = cv2.BFMatcher(cv2.NORM_L2)
-matches = matcher.knnMatch(des1, des2, k=2)
-good = [m for m, n in matches if m.distance < 0.75 * n.distance]
-result = cv2.drawMatches(img1, kp1, img2, kp2, good, None,
-                         flags=cv2.DrawMatchesFlags_NOT_DRAW_SINGLE_POINTS)
-print('Keypoints:', len(kp1), len(kp2), 'Good matches:', len(good))
-cv2.imshow('SURF matches', result)
-cv2.waitKey(0)
-
-# Comparison alternatives
-sift = cv2.SIFT_create()
-orb = cv2.ORB_create()`
+    script: 'lab04_surf.py',
+    code: 'python labs/lab04_surf.py image1.jpg image2.jpg --thresholds 200 400 800'
   },
   '05': {
     title: 'PCA & Eigenfaces', topic: 'DIMENSIONALITY REDUCTION', week: 'WEEK 7–8',
     objective: 'Create eigenfaces from multiple aligned face images and measure the trade-off between principal components and retained variance.',
     selectLabel: 'PCA experiment', options: [['eigenfaces', 'Eigenfaces & reconstruction']],
-    procedure: ['Select at least three face images at once; each image is resized to a common 48×48 grayscale grid.', 'Center every flattened image by subtracting the mean face.', 'Compute principal components in sample space and convert them to eigenfaces.', 'Reconstruct the first face using the selected number of components.', 'Inspect cumulative explained variance, then use the Python reference for LFW PCA and SVM recognition.'],
+    procedure: ['Select at least three aligned face images for the browser reconstruction demo.', 'Inspect the mean face, eigenfaces, and retained variance.', 'Run the Python script to fit a whitened PCA and RBF SVM on LFW and generate the PDF report with held-out errors.'],
     findings: [
       ['Why reduce dimensionality?', 'PCA replaces thousands of correlated pixels with a smaller set of high-variance features, reducing storage, computation, and overfitting.'],
       ['What do early eigenfaces capture?', 'The first components usually represent broad lighting, face outline, and dominant eye or jaw placement; later components describe finer variations and noise.'],
       ['What does whitening do?', 'It scales projected components to unit variance, preventing high-variance PCA directions from dominating an SVM solely because of numerical scale.']
     ],
-    code: String.raw`from sklearn.datasets import fetch_lfw_people
-from sklearn.model_selection import train_test_split
-from sklearn.decomposition import PCA
-from sklearn.svm import SVC
-from sklearn.metrics import classification_report
-import matplotlib.pyplot as plt
-import numpy as np
-
-faces = fetch_lfw_people(min_faces_per_person=70, resize=0.4)
-X_train, X_test, y_train, y_test = train_test_split(
-    faces.data, faces.target, test_size=0.2, random_state=42, stratify=faces.target)
-
-pca = PCA(n_components=150, svd_solver='randomized', whiten=True, random_state=42)
-X_train_pca = pca.fit_transform(X_train)
-X_test_pca = pca.transform(X_test)
-eigenfaces = pca.components_.reshape((150, *faces.images.shape[1:]))
-
-clf = SVC(kernel='rbf', class_weight='balanced')
-clf.fit(X_train_pca, y_train)
-y_pred = clf.predict(X_test_pca)
-print(classification_report(y_test, y_pred, target_names=faces.target_names))
-
-variance = pca.explained_variance_ratio_.cumsum()
-print('Components for 90% variance:', np.searchsorted(variance, .90) + 1)
-plt.plot(np.arange(1, len(variance) + 1), variance)
-plt.axhline(.90, color='red', linestyle='--')
-plt.xlabel('Principal components'); plt.ylabel('Cumulative explained variance')
-plt.show()`
+    script: 'lab05_eigenfaces.py',
+    code: 'python labs/lab05_eigenfaces.py'
   },
   '06': {
     title: 'YOLOv11 Object Detection', topic: 'OBJECT DETECTION & DATASETS', week: 'WEEK 8–9',
     objective: 'Understand YOLO labels, visualize detections, and follow a complete Ultralytics YOLO11 inference, custom-training, and evaluation workflow.',
     selectLabel: 'Detection activity', options: [['labels', 'YOLO label visualizer']],
-    procedure: ['Upload an image and enter class names plus YOLO-format labels.', 'Use one line per object: class_id x_center y_center width height confidence, normalized from 0 to 1.', 'Render and inspect each bounding box, class label, and confidence score.', 'Prepare images/labels train and validation folders plus data.yaml.', 'Run the supplied Python code for pretrained inference, custom training, validation, and testing.'],
+    procedure: ['Upload an image and inspect the boxes from YOLO-format labels. Confidence is optional for the preview.', 'Run pretrained YOLO11 on a webcam or image in Python.', 'Prepare a labeled dataset with train, validation, and test splits, or generate the practice dataset.', 'Train YOLO11, evaluate the best checkpoint, and inspect predictions on a held-out image.'],
     findings: [
       ['Detection vs classification?', 'Classification assigns a category to an entire image. Detection also localizes every object with a bounding box—for example, identifying three cars and their positions instead of only saying “car”.'],
       ['Why normalize YOLO coordinates?', 'Normalized center, width, and height values make annotations independent of the image resolution.'],
       ['Which metrics matter?', 'Precision measures detection correctness, recall measures coverage, and mAP summarizes precision-recall performance across classes and IoU thresholds.']
     ],
-    code: String.raw`from ultralytics import YOLO
-
-# Pretrained inference (official weight name)
-model = YOLO('yolo11n.pt')
-results = model.predict(source='input.jpg', conf=0.25, save=True)
-for result in results:
-    print(result.boxes.xyxy, result.boxes.conf, result.boxes.cls)
-
-# Custom training: data.yaml points to images/train and images/val
-model.train(data='data.yaml', epochs=100, imgsz=640)
-metrics = model.val(data='data.yaml')
-print('mAP50-95:', metrics.box.map)
-
-# Use the best trained checkpoint on a new image
-best = YOLO('runs/detect/train/weights/best.pt')
-best.predict(source='new_image.jpg', conf=0.25, save=True)`
+    script: 'lab06_yolo.py',
+    code: `python labs/lab06_yolo.py webcam
+python labs/lab06_yolo.py demo-data
+python labs/lab06_yolo.py train --data lab-output/06/shapes/data.yaml --epochs 5 --imgsz 160
+python labs/lab06_yolo.py val --weights lab-output/06/train/weights/best.pt --data lab-output/06/shapes/data.yaml --split test --imgsz 160`
   },
   '07': {
     title: 'Segmentation Techniques', topic: 'PIXEL & REGION SEGMENTATION', week: 'WEEK 13',
     objective: 'Compare thresholding, region-based, edge-based, and color-cluster segmentation on the same uploaded image.',
     selectLabel: 'Segmentation method', options: [['threshold', 'Thresholding (Otsu)'], ['region', 'Region growing'], ['edge', 'Edge-based segmentation'], ['clusters', 'Color clusters (semantic preparation)']],
-    procedure: ['Upload an image containing distinguishable objects or regions.', 'Apply Otsu thresholding and compare foreground/background separation.', 'Choose a seed point and tolerance for region growing.', 'Use Canny boundaries for edge-based segmentation.', 'Cluster pixels by color to illustrate the per-pixel labeling stage used before evaluating semantic models; use the Python reference for pretrained DeepLab.'],
+    procedure: ['Compare Otsu thresholding, region growing, Canny boundaries, and color clustering in the browser.', 'Run the Python script for adaptive thresholding, watershed separation, filled edge regions, and pretrained DeepLabV3 class masks.', 'Supply ground-truth masks to compare the outputs using intersection over union (IoU).'],
     findings: [
       ['Thresholding', 'Advantage: simple and fast for high-contrast images. Limitation: struggles with uneven lighting and overlapping intensity distributions.'],
       ['Region-based', 'Advantage: produces connected areas based on similarity. Limitation: results depend strongly on seed selection and tolerance.'],
       ['Edge-based', 'Advantage: highlights object boundaries. Limitation: noise or broken edges can prevent closed regions.'],
       ['Semantic segmentation', 'Advantage: gives every pixel a learned class label. Limitation: needs annotated data, substantial computation, and a trained model.']
     ],
-    code: String.raw`import cv2
-from skimage.segmentation import flood
-
-img = cv2.imread('input.jpg')
-gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-_, otsu = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
-adaptive = cv2.adaptiveThreshold(gray, 255, cv2.ADAPTIVE_THRESH_GAUSSIAN_C,
-                                 cv2.THRESH_BINARY, 11, 2)
-edges = cv2.Canny(gray, 100, 200)
-region = flood(gray, seed_point=(gray.shape[0] // 2, gray.shape[1] // 2), tolerance=20)
-
-cv2.imshow('Otsu', otsu)
-cv2.imshow('Adaptive', adaptive)
-cv2.imshow('Edges', edges)
-cv2.imshow('Region growing', (region * 255).astype('uint8'))
-cv2.waitKey(0)
-
-# Semantic extension: run a pretrained DeepLab or U-Net model and compare
-# pixel labels with ground truth using IoU = intersection / union.`
+    script: 'lab07_segmentation.py',
+    code: 'python labs/lab07_segmentation.py input.jpg --semantic-image scene.jpg'
   }
 };
 
@@ -397,6 +325,13 @@ function renderGuide(definition) {
   document.querySelector('#procedure-content').innerHTML = `<ol>${definition.procedure.map((item) => `<li>${item}</li>`).join('')}</ol>`;
   document.querySelector('#findings-content').innerHTML = definition.findings.map(([question, answer]) => `<div class="qa"><strong>${question}</strong><p>${answer}</p></div>`).join('');
   document.querySelector('#python-code').textContent = definition.code;
+  const workflow = document.querySelector('#local-workflow');
+  const download = document.querySelector('#download-python');
+  workflow.hidden = !definition.script;
+  if (definition.script) download.href = `labs/${definition.script}`;
+  else download.removeAttribute('href');
+  document.querySelector('#python-reference-label').textContent = definition.script ? 'Run commands' : 'Python / OpenCV reference';
+  document.querySelector('#python-reference-action').textContent = definition.script ? 'View commands' : 'View code';
   document.querySelector('#guide-progress').textContent = 'Ready to experiment';
 }
 
@@ -847,7 +782,7 @@ function runLabFour() {
     overlay.context.beginPath(); overlay.context.moveTo(point.x, point.y); overlay.context.lineTo(point.x + Math.cos(angle) * radius, point.y + Math.sin(angle) * radius); overlay.context.stroke();
   });
   activeResultCanvas = overlay.canvas;
-  appendAnalysis('SURF INTERPRETATION', `Detected ${points.length} stable local maxima. Increase the Hessian threshold to keep only stronger structures; decrease it to retain more weak or textured points.`, 'The browser overlay demonstrates Hessian keypoint selection. Exact patented SURF descriptors and image matching are provided in the Python/OpenCV reference below.');
+  appendAnalysis('SURF INTERPRETATION', `Detected ${points.length} stable local maxima. Increase the Hessian threshold to keep only stronger structures; decrease it to retain more weak or textured points.`, 'Run the Python script below to compute SURF descriptors and compare matches across detectors.');
   revealResults();
 }
 
@@ -903,7 +838,7 @@ function runLabFive() {
   renderGrayResult('Mean face', `${count} aligned samples`, Uint8ClampedArray.from(mean, (value) => clamp(value, 0, 255)), 48, 48);
   components.slice(0, 3).forEach((face, index) => renderGrayResult(`Eigenface ${index + 1}`, `PC${index + 1} · ${(eigenvalues[index] / trace * 100).toFixed(1)}% variance`, normalizeSigned(face), 48, 48));
   activeResultCanvas = renderGrayResult('Reconstructed face', `${used} components · ${retained.toFixed(1)}% retained variance`, Uint8ClampedArray.from(reconstruction, (value) => clamp(value, 0, 255)), 48, 48).canvas;
-  appendAnalysis('PCA ANALYSIS', `${used} principal component${used === 1 ? '' : 's'} retain ${retained.toFixed(1)}% of this uploaded dataset's variance.`, 'More components improve reconstruction but reduce compression. The full LFW + whitening + SVM recognition workflow is available in the Python reference.');
+  appendAnalysis('PCA ANALYSIS', `${used} principal component${used === 1 ? '' : 's'} retain ${retained.toFixed(1)}% of this uploaded dataset's variance.`, 'Run the Python script below to evaluate LFW face recognition and generate the PDF report.');
   revealResults();
 }
 
@@ -921,7 +856,7 @@ function runLabSix() {
   clearResults();
   const original = createResultCard('Original image', 'Input for YOLO annotation review', sourceCanvas.width, sourceCanvas.height);
   original.context.drawImage(sourceCanvas, 0, 0);
-  const result = createResultCard('YOLO detections', `${detections.length} object${detections.length === 1 ? '' : 's'}`, sourceCanvas.width, sourceCanvas.height);
+  const result = createResultCard('YOLO annotations', `${detections.length} object${detections.length === 1 ? '' : 's'}`, sourceCanvas.width, sourceCanvas.height);
   result.context.drawImage(sourceCanvas, 0, 0);
   const lineWidth = Math.max(2, Math.min(sourceCanvas.width, sourceCanvas.height) / 250);
   result.context.lineWidth = lineWidth;
@@ -941,7 +876,7 @@ function runLabSix() {
     result.context.fillStyle = '#07101d'; result.context.fillText(label, x + 6, Math.max(15, y - 5));
   });
   activeResultCanvas = result.canvas;
-  appendAnalysis('YOLO WORKFLOW', `${detections.length} normalized annotation${detections.length === 1 ? '' : 's'} converted to pixel-space bounding boxes.`, 'This visualizer validates YOLO-format labels. Actual pretrained inference and custom-model training run through Ultralytics using the Python reference; the interface does not claim to fabricate model predictions.');
+  appendAnalysis('YOLO WORKFLOW', `${detections.length} normalized annotation${detections.length === 1 ? '' : 's'} converted to pixel-space bounding boxes.`, 'Run the Python script below for model predictions, training, and evaluation.');
   revealResults();
 }
 
@@ -975,7 +910,7 @@ function runLabSeven() {
     const clusters = Number(document.querySelector('#cluster-count').value);
     const clustered = colorKMeans(sourceImageData.data, width, height, clusters);
     activeResultCanvas = renderImageDataResult('Color clusters', `${clusters} pixel groups`, clustered, width, height).canvas;
-    appendAnalysis('SEMANTIC PREPARATION', `Pixels were assigned to ${clusters} visual color groups. Each color represents a cluster, not a learned object class.`, 'True semantic segmentation uses a trained DeepLab or U-Net to label pixels with meanings such as person, road, or sky. This local clustering demonstrates the per-pixel label map without misrepresenting it as a neural model.');
+    appendAnalysis('COLOR CLUSTERING', `Pixels were assigned to ${clusters} visual color groups.`, 'Run the Python script below to label pixels with classes predicted by pretrained DeepLabV3.');
   }
   revealResults();
 }

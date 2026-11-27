@@ -1,0 +1,8 @@
+# Copy as data.yaml, then update the absolute path and class names.
+path: C:/datasets/my_objects
+train: images/train
+val: images/val
+test: images/test
+names:
+  0: first_class
+  1: second_class

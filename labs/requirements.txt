@@ -1,0 +1,10 @@
+matplotlib
+numpy
+opencv-python
+Pillow
+scikit-image
+scikit-learn
+scipy
+torch
+torchvision
+ultralytics>=8.3
